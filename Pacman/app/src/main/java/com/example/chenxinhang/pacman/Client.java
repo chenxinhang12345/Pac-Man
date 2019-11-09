@@ -1,25 +1,56 @@
 package com.example.chenxinhang.pacman;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Scanner;
+import java.net.Socket;
 
 public class Client {
     DatagramSocket ds;
     InetAddress ip;
     byte buf[];
+    DatagramPacket DPreceive;
+    byte receiveBuf[];
+    DataOutputStream outToServer;
+    Socket socket;
+    BufferedReader inFromServer;
+    public static final String SERVER_IP = "10.0.2.2";
+    public static final int SERVER_PORT = 1234;
     public Client() throws IOException{
         this.ds = new DatagramSocket();
-        this.ip = InetAddress.getByName("10.0.2.2");
+        this.ip = InetAddress.getByName(SERVER_IP);
         this.buf = null;
-    }
+        this.receiveBuf = new byte[1024];
+        this.socket = new Socket(ip, SERVER_PORT);
+        this.outToServer = new DataOutputStream(socket.getOutputStream());
+        this.inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+    }
     public void send (int xPos, int yPos) throws IOException{
         buf = (xPos+"\n"+yPos).getBytes();
-        DatagramPacket Dpsend = new DatagramPacket(buf, buf.length,ip,1234);
-        ds.send(Dpsend);
+        DatagramPacket DPsend = new DatagramPacket(buf, buf.length,ip,SERVER_PORT);
+        ds.send(DPsend);
+    }
+    public String receive() throws IOException{
+        this.DPreceive = new DatagramPacket(receiveBuf, receiveBuf.length,ip,SERVER_PORT);
+        ds.receive(DPreceive);
+        String data = new String( DPreceive.getData(), 0,
+                DPreceive.getLength());
+        return data;
+    }
+    public String receiveInitialization() throws IOException{
+        String receivedBytes;
+        while((receivedBytes = inFromServer.readLine()) != null) {
+            return receivedBytes;
+        }
+        return null;
     }
 //    public static void main(String args[]) throws IOException {
 //        Scanner sc = new Scanner(System.in);

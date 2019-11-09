@@ -3,12 +3,12 @@ package com.example.chenxinhang.pacman;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
+
+import java.io.IOException;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private MainThread thread;
@@ -18,10 +18,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private Point player2Point;
     private Client playerClient;
 
-    public GamePanel(Context context) {
+    public GamePanel(Context context) throws IOException {
         super(context);
         getHolder().addCallback(this);
         thread = new MainThread(getHolder(), this);
+        String info = playerClient.receiveInitialization();
+        System.out.println(info);
         player1 = new Player( Color.RED , 50,50,50,50, 10);
         player2 = new Player(Color.BLUE,200,200,50,50,20);
         player1Point = new Point(150,150);
@@ -77,6 +79,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         player2.update(player2Point);
         try {
             playerClient.send(player1.getxPos(), player1.getyPos());
+            String data = playerClient.receive();
+            System.out.println("receive:"+data);
+//            System.out.println("1");
         }catch (Exception e){
             e.printStackTrace();
         }
