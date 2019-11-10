@@ -58,10 +58,12 @@ func (user User) HandleRead() {
 
 func (user User) HandleWrite() {
 	writer := bufio.NewWriter(user.Conn)
-	select {
-	case msg := <-user.MQ:
-		writer.Write([]byte(msg))
-		writer.Flush()
+	for {
+		select {
+		case msg := <-user.MQ:
+			writer.Write([]byte(msg))
+			writer.Flush()
+		}
 	}
 }
 
