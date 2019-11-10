@@ -63,6 +63,9 @@ func (user User) HandleWrite() {
 		case msg := <-user.MQ:
 			writer.Write([]byte(msg))
 			writer.Flush()
+		default:
+			writer.Write([]byte("\n"))
+			writer.Flush()
 		}
 	}
 }

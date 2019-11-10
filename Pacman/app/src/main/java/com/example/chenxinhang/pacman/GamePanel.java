@@ -24,10 +24,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         super(context);
         getHolder().addCallback(this);
         thread = new MainThread(getHolder(), this);
-
-
-        player1 = new Player( Color.RED , 50,50,50,50, 10);
-        player2 = new Player(Color.BLUE,200,200,50,50,20);
 //        player1Point = new Point(150,150);
         player2Point = new Point(200,200);
         try {
@@ -51,10 +47,22 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             JSONObject obj = new JSONObject(info);
             int X = obj.getInt("X");
             int Y = obj.getInt("Y");
+            int ID = obj.getInt("ID");
             int color = obj.getInt("Color");
-            System.out.println(X);
+            player1 = new Player( color , X,Y,50,50, 10,ID);
             player1Point = new Point(X,Y);
-            player1.setColor(color);
+            while(playerClient.newUser.equals("None")){
+                System.out.println("wait another player...");
+            }
+            JSONObject objUser = new JSONObject(playerClient.newUser);
+            int X2 = objUser.getInt("X");
+            int Y2 = objUser.getInt("Y");
+            int ID2 = objUser.getInt("ID");
+            int color2 = objUser.getInt("Color");
+            player2 = new Player(color2,X2,Y2,50,50,20,ID2);
+            player2Point = new Point(X2,Y2);
+            System.out.println(X);
+
         }catch (Exception e){
             e.printStackTrace();
         }

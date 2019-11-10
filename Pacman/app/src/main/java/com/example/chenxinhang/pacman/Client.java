@@ -22,6 +22,7 @@ public class Client  {
     Socket socket;
     BufferedReader inFromServer;
     String receivedBytes = "None";
+    String newUser = "None";
 
     public static final String SERVER_IP = "10.0.2.2";
     public static final int TCP_SERVER_PORT = 4321;
@@ -39,13 +40,14 @@ public class Client  {
                     outToServer = new DataOutputStream(socket.getOutputStream());
                     inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String Bytes;
-                        while ((Bytes = inFromServer.readLine()) != null) {
+                        while ((Bytes = inFromServer.readLine()) != null ) {
+                            System.out.println(Bytes);
                             String[] stringlist = Bytes.split(";",2);
                             if(stringlist[0].equals("USERINFO")){
                                 receivedBytes = stringlist[1];
+                            }else if(stringlist[0].equals("NEWUSER")){
+                                newUser = stringlist[1];
                             }
-
-                            System.out.println(receivedBytes);
                         }
 
                     //Your code goes here
@@ -77,35 +79,21 @@ public class Client  {
             }
         return receivedBytes;
     }
-//    public static void main(String args[]) throws IOException {
-//        Scanner sc = new Scanner(System.in);
-//
-//        // Step 1:Create the socket object for
-//        // carrying the data.
-//        DatagramSocket ds = new DatagramSocket();
-//
-//        InetAddress ip = InetAddress.getLocalHost();
-//        byte buf[] = null;
-//
-//        // loop while user not enters "bye"
-//        while (true) {
-//            String inp = sc.nextLine();
-//
-//            // convert the String input into the byte array.
-//            buf = inp.getBytes();
-//
-//            // Step 2 : Create the datagramPacket for sending
-//            // the data.
-//            DatagramPacket DpSend =
-//                    new DatagramPacket(buf, buf.length, ip, 1234);
-//
-//            // Step 3 : invoke the send call to actually send
-//            // the data.
-//            ds.send(DpSend);
-//
-//            // break the loop if user enters "bye"
-//            if (inp.equals("bye"))
-//                break;
-//        }
-//    }
+    public static void main(String args[]) throws IOException {
+        Socket socket = new Socket("localhost", TCP_SERVER_PORT);
+
+        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String Bytes;
+        while ((Bytes = inFromServer.readLine()) != null) {
+            if(Bytes.length()>2) {
+                System.out.println(Bytes);
+            }
+
+//            if(stringlist[0].equals("USERINFO")){
+//                receivedBytes = stringlist[1];
+//            }else if(stringlist[0].equals("NEWUSER")){
+//                newUser = stringlist[1];
+//            }
+        }
+    }
 }
