@@ -1,6 +1,9 @@
 package game
 
-import "sync"
+import (
+	"net"
+	"sync"
+)
 
 type UsersLookUP struct {
 	Users map[int]User
@@ -15,4 +18,9 @@ type MoveInfo struct {
 	ID int
 	X  int
 	Y  int
+}
+
+type MovePacket struct {
+	Addr net.Addr
+	Move MoveInfo
 }

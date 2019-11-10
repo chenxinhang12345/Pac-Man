@@ -12,6 +12,8 @@ import (
 
 var UDPServer net.PacketConn
 var TCPServer net.Listener
+var udpTable = map[int]net.Addr{}
+var udpMQ chan game.MovePacket
 
 func init() {
 	UDPServer, err := net.ListenPacket("udp", ":1234")
@@ -20,10 +22,27 @@ func init() {
 	}
 	for i := 0; i < 10; i++ {
 		go UDPListen(UDPServer)
+		go UDPWrite(UDPServer)
 	}
 	TCPServer, err = net.Listen("tcp", ":4321")
 	if err != nil {
 		panic(err)
+	}
+	udpMQ = make(chan game.MovePacket, 1024)
+
+}
+
+func UDPWrite(UDPServer net.PacketConn) {
+	for {
+		select {
+		case msg := <-udpMQ:
+			move := msg.Move
+			bytes, err := json.Marshal(move)
+			if err != nil {
+				logrus.Error(err)
+			}
+			UDPServer.WriteTo(bytes, msg.Addr)
+		}
 	}
 }
 
@@ -34,6 +53,7 @@ func UDPListen(UDPServer net.PacketConn) {
 		if err != nil {
 			logrus.Errorf("Error from %s, %s", addr.String(), err)
 		}
+		fmt.Println(string(buffer[:n]))
 		decodeUDP(buffer[:n], addr)
 	}
 
@@ -75,15 +95,29 @@ func decodeUDP(bytes []byte, addr net.Addr) {
 	tokens := strings.Split(str, ";")
 	if tokens[0] == "POS" {
 		var move game.MoveInfo
-		err := json.Unmarshal([]byte(tokens[1]), &move)
-		if err != nil {
+		if err := json.Unmarshal([]byte(tokens[1]), &move); err != nil {
 			logrus.Error(err)
 		}
-		game.Users.Mux.Lock()
-		user := game.Users.Users[move.ID]
-		user.MoveMQ <- tokens[1]
-		user.UDPaddr = addr
-		game.Users.Mux.Unlock()
+		udpTable[move.ID] = addr
+		distributeMove(tokens[1])
+	}
+}
+
+func distributeMove(move string) {
+	var moveInfo game.MoveInfo
+	if err := json.Unmarshal([]byte(move), &moveInfo); err != nil {
+		logrus.Error(err)
+	}
+	fmt.Println(udpTable)
+	for k, v := range udpTable {
+		if k == moveInfo.ID {
+			continue
+		}
+		msg := game.MovePacket{
+			Addr: v,
+			Move: moveInfo,
+		}
+		udpMQ <- msg
 	}
 }
 

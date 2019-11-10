@@ -12,14 +12,13 @@ import (
 )
 
 type User struct {
-	ID      int
-	X       int
-	Y       int
-	Color   int
-	Score   int
-	Conn    net.Conn
-	UDPaddr net.Addr
-	TCPMQ   chan string
+	ID    int
+	X     int
+	Y     int
+	Color int
+	Score int
+	Conn  net.Conn
+	TCPMQ chan string
 }
 
 func NewUser(conn net.Conn) User {
@@ -63,9 +62,6 @@ func (user User) HandleWrite() {
 		select {
 		case msg := <-user.TCPMQ:
 			writer.Write([]byte(msg))
-			writer.Flush()
-		default:
-			writer.Write([]byte("\n"))
 			writer.Flush()
 		}
 	}
