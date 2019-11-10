@@ -3,6 +3,7 @@ package game
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"math/rand"
 	"net"
 	"time"
@@ -43,8 +44,11 @@ func (user User) HandleRead() {
 		user.Conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 		str, err := reader.ReadString('\n')
 		if err != nil {
-			// logrus.Errorln("Error when read from TCP")
-
+			if err == io.EOF {
+				user.Conn.Close()
+				return
+			}
+			logrus.Errorln("Error when read from TCP", err)
 		}
 		logrus.Println(str)
 	}
