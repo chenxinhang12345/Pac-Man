@@ -22,6 +22,7 @@ public class Client  {
     Socket socket;
     BufferedReader inFromServer;
     String receivedBytes = "None";
+
     public static final String SERVER_IP = "10.0.2.2";
     public static final int TCP_SERVER_PORT = 4321;
     public static final int UDP_SERVER_PORT = 1234;
@@ -31,7 +32,6 @@ public class Client  {
         this.buf = null;
         this.receiveBuf = new byte[1024];
         Thread thread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 try  {
@@ -40,7 +40,11 @@ public class Client  {
                     inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String Bytes;
                         while ((Bytes = inFromServer.readLine()) != null) {
-                            receivedBytes = Bytes;
+                            String[] stringlist = Bytes.split(";",2);
+                            if(stringlist[0].equals("USERINFO")){
+                                receivedBytes = stringlist[1];
+                            }
+
                             System.out.println(receivedBytes);
                         }
 

@@ -33,6 +33,9 @@ public class Player implements GameObject {
         return yPos;
     }
 
+    public void setColor(int color){
+        this.color = color;
+    }
     @Override
     public void draw(Canvas canvas) {
         Paint paint = new Paint();

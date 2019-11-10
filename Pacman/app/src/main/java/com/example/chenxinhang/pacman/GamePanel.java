@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
@@ -26,13 +28,14 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
         player1 = new Player( Color.RED , 50,50,50,50, 10);
         player2 = new Player(Color.BLUE,200,200,50,50,20);
-        player1Point = new Point(150,150);
+//        player1Point = new Point(150,150);
         player2Point = new Point(200,200);
         try {
             playerClient = new Client();
             while(playerClient.receivedBytes.equals("None")){
                 System.out.println("waiting");
             }
+            parseInfo(playerClient.receivedBytes);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -43,7 +46,20 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
     }
+    public void parseInfo(String info){
+        try {
+            JSONObject obj = new JSONObject(info);
+            int X = obj.getInt("X");
+            int Y = obj.getInt("Y");
+            int color = obj.getInt("Color");
+            System.out.println(X);
+            player1Point = new Point(X,Y);
+            player1.setColor(color);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
+    }
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         thread = new MainThread(getHolder(), this);
