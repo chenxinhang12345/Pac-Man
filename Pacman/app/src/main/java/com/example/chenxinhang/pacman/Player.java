@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.graphics.Point;
 
 public class Player implements GameObject {
+    private int ID; //network ID
     private Rect rectangle;
     private int color ;
     private Point target;
@@ -16,13 +17,13 @@ public class Player implements GameObject {
     private int width;
     private int speed;
 
-    public Player( int color,int xPos,int yPos,int width, int height,int speed){
+    public Player( int color,int xPos,int yPos,int width, int height,int speed,int ID){
         this.color = color;
         this.xPos = xPos;
         this.yPos = yPos;
         this.rectangle = new Rect(xPos-width/2,yPos-height/2,xPos+width/2,yPos+height/2);
         this.speed = speed;
-
+        this.ID = ID;
     }
 
     public int getxPos() {
@@ -33,6 +34,13 @@ public class Player implements GameObject {
         return yPos;
     }
 
+    public void setColor(int color){
+        this.color = color;
+    }
+
+    public int getColor(){
+        return color;
+    }
     @Override
     public void draw(Canvas canvas) {
         Paint paint = new Paint();
