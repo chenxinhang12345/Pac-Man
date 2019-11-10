@@ -2,7 +2,7 @@ package network
 
 import (
 	"Pac-Man/server/game"
-	"encoding/binary"
+	"fmt"
 	"net"
 )
 
@@ -41,13 +41,17 @@ func handleTCP(conn net.Conn) {
 }
 
 func createMsgString(header string, msg string) string {
-	// Append header verb
-	data := header + "\n"
-	// Append msg length
-	length := make([]byte, 8)
-	binary.BigEndian.PutUint64(length, uint64(len(msg)))
-	data = string(append([]byte(data), length...))
-	// Append msg
-	data += msg
-	return data
+	return fmt.Sprintf("%s\n%s\nEND\n", header, msg)
 }
+
+// func createMsgString(header string, msg string) string {
+// 	// Append header verb
+// 	data := header + "\n"
+// 	// Append msg length
+// 	length := make([]byte, 8)
+// 	binary.BigEndian.PutUint64(length, uint64(len(msg)))
+// 	data = string(append([]byte(data), length...))
+// 	// Append msg
+// 	data += msg
+// 	return data
+// }
