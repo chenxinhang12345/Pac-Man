@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strings"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -24,9 +25,9 @@ func TestServer(t *testing.T) {
 			if err != nil {
 				logrus.Error(err)
 			}
-			if str != "USERINFO\n" {
-				logrus.Errorf("Wrong response: %s", str)
-			}
+			// if str != "USERINFO\n" {
+			// 	logrus.Errorf("Wrong response: %s", str)
+			// }
 			// size := make([]byte, 8)
 			// n, err := reader.Read(size)
 			// if err != nil || n != 8 {
@@ -40,11 +41,11 @@ func TestServer(t *testing.T) {
 			// 	logrus.Errorf("Error when read data: %s  read length: %d", err, n)
 			// }
 			// fmt.Println(string(data))
-			str, err = reader.ReadString('\n')
-			if err != nil {
-				logrus.Error(err)
+			tokens := strings.Split(str, ";")
+			if tokens[0] != "USERINFO" {
+				logrus.Errorf("Wrong response: %s", str)
 			}
-			fmt.Println(string(str))
+			fmt.Println(tokens[1])
 		})
 	}
 }
