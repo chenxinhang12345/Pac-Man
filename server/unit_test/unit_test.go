@@ -4,7 +4,6 @@ import (
 	"Pac-Man/server/network"
 	"bufio"
 	"fmt"
-	"io"
 	"net"
 	"strings"
 	"testing"
@@ -15,28 +14,29 @@ import (
 func TestServer(t *testing.T) {
 	go network.TCPListen()
 	for i := 0; i < 5; i++ {
-		t.Run("Test Server Connection", func(t *testing.T) {
+		go t.Run("Test Server Connection", func(t *testing.T) {
 			conn, err := net.Dial("tcp", ":4321")
 			if err != nil {
 				logrus.Error(err)
 			}
 			defer conn.Close()
 			reader := bufio.NewReader(conn)
-			// for {
-			str, err := reader.ReadString('\n')
-			if err != nil {
-				if err == io.EOF {
-					conn.Close()
-					return
+			for {
+				str, err := reader.ReadString('\n')
+				if err != nil {
+					// if err == io.EOF {
+					// conn.Close()
+					// return
+					// }
+					logrus.Error(err)
 				}
-				logrus.Error(err)
+				tokens := strings.Split(str, ";")
+				if tokens[0] == "USERINFO" {
+					fmt.Printf("USERINFO: %s", tokens[1])
+				} else if tokens[0] == "NEWUSER" {
+					fmt.Printf("NEWUSER: %s", tokens[1])
+				}
 			}
-			tokens := strings.Split(str, ";")
-			if tokens[0] != "USERINFO" {
-				logrus.Errorf("Wrong response: %s", str)
-			}
-			fmt.Println(tokens[1])
-			// }
 
 			// if str != "USERINFO\n" {
 			// 	logrus.Errorf("Wrong response: %s", str)
@@ -57,6 +57,7 @@ func TestServer(t *testing.T) {
 
 		})
 	}
+	select {}
 }
 
 func bytes2int(bytes []byte) int {

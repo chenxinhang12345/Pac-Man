@@ -32,7 +32,7 @@ func NewUser(conn net.Conn) User {
 		X:     rand.Intn(500),
 		Y:     rand.Intn(500),
 		Conn:  conn,
-		Color: rand.Intn(16777215),
+		Color: -rand.Intn(16777215),
 		MQ:    make(chan string, 1024),
 	}
 	Users.Users[id] = user
