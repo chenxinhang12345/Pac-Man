@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"net"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -20,14 +21,14 @@ type User struct {
 }
 
 func NewUser(conn net.Conn) User {
-	id := rand.Int()
-	for _, ok := Users[id]; ok == true; id = rand.Int() {
+	id := rand.Intn(1000)
+	for _, ok := Users[id]; ok == true; id = rand.Intn(1000) {
 		_, ok = Users[id]
 	}
 	user := User{
-		ID:    id % 1000,
-		X:     rand.Int() % 200,
-		Y:     rand.Int() % 200,
+		ID:    id,
+		X:     rand.Intn(500),
+		Y:     rand.Intn(500),
 		Conn:  conn,
 		Color: 0,
 		MQ:    make(chan string, 1024),
@@ -39,9 +40,11 @@ func NewUser(conn net.Conn) User {
 func (user User) HandleRead() {
 	reader := bufio.NewReader(user.Conn)
 	for {
+		user.Conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 		str, err := reader.ReadString('\n')
 		if err != nil {
-			logrus.Errorln("Error when read from TCP")
+			// logrus.Errorln("Error when read from TCP")
+
 		}
 		logrus.Println(str)
 	}
@@ -57,6 +60,10 @@ func (user User) HandleWrite() {
 }
 
 func (user User) ToString() string {
+	return string(user.ToBytes())
+}
+
+func (user User) ToBytes() []byte {
 	info := struct {
 		ID    int
 		Color int
@@ -74,5 +81,5 @@ func (user User) ToString() string {
 	if err != nil {
 		panic(err)
 	}
-	return string(userMarshal)
+	return userMarshal
 }

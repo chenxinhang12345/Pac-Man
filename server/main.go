@@ -5,6 +5,5 @@ import (
 )
 
 func main() {
-	network.TCPListen()
-	select {}
+	go network.TCPListen()
 }
