@@ -64,6 +64,9 @@ func (user User) HandleWrite() {
 		case msg := <-user.TCPMQ:
 			writer.Write([]byte(msg))
 			writer.Flush()
+		default:
+			writer.Write([]byte("\n"))
+			writer.Flush()
 		}
 	}
 }
