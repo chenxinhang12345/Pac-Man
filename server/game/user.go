@@ -23,18 +23,20 @@ type User struct {
 
 func NewUser(conn net.Conn) User {
 	id := rand.Intn(1000)
-	for _, ok := Users[id]; ok == true; id = rand.Intn(1000) {
-		_, ok = Users[id]
+	Users.Mux.Lock()
+	for _, ok := Users.Users[id]; ok == true; id = rand.Intn(1000) {
+		_, ok = Users.Users[id]
 	}
 	user := User{
 		ID:    id,
 		X:     rand.Intn(500),
 		Y:     rand.Intn(500),
 		Conn:  conn,
-		Color: 0,
+		Color: rand.Intn(16777215),
 		MQ:    make(chan string, 1024),
 	}
-	Users[id] = user
+	Users.Users[id] = user
+	Users.Mux.Unlock()
 	return user
 }
 

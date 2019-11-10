@@ -36,6 +36,15 @@ func handleTCP(conn net.Conn) {
 	user := game.NewUser(conn)
 
 	user.MQ <- createMsgString("USERINFO", user.ToString())
+	game.Users.Mux.RLock()
+	for k, other := range game.Users.Users {
+		if k == user.ID {
+			continue
+		}
+		user.MQ <- createMsgString("NEWUSER", other.ToString())
+		other.MQ <- createMsgString("NEWUSER", user.ToString())
+	}
+	game.Users.Mux.RUnlock()
 	go user.HandleRead()
 	go user.HandleWrite()
 }

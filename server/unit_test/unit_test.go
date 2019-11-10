@@ -4,6 +4,7 @@ import (
 	"Pac-Man/server/network"
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"strings"
 	"testing"
@@ -21,10 +22,22 @@ func TestServer(t *testing.T) {
 			}
 			defer conn.Close()
 			reader := bufio.NewReader(conn)
+			// for {
 			str, err := reader.ReadString('\n')
 			if err != nil {
+				if err == io.EOF {
+					conn.Close()
+					return
+				}
 				logrus.Error(err)
 			}
+			tokens := strings.Split(str, ";")
+			if tokens[0] != "USERINFO" {
+				logrus.Errorf("Wrong response: %s", str)
+			}
+			fmt.Println(tokens[1])
+			// }
+
 			// if str != "USERINFO\n" {
 			// 	logrus.Errorf("Wrong response: %s", str)
 			// }
@@ -41,11 +54,7 @@ func TestServer(t *testing.T) {
 			// 	logrus.Errorf("Error when read data: %s  read length: %d", err, n)
 			// }
 			// fmt.Println(string(data))
-			tokens := strings.Split(str, ";")
-			if tokens[0] != "USERINFO" {
-				logrus.Errorf("Wrong response: %s", str)
-			}
-			fmt.Println(tokens[1])
+
 		})
 	}
 }
