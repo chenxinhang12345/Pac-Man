@@ -41,7 +41,7 @@ func handleTCP(conn net.Conn) {
 }
 
 func createMsgString(header string, msg string) string {
-	return fmt.Sprintf("%s\n%s\nEND\n", header, msg)
+	return fmt.Sprintf("%s;%s\n", header, msg)
 }
 
 // func createMsgString(header string, msg string) string {
