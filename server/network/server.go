@@ -2,22 +2,39 @@ package network
 
 import (
 	"Pac-Man/server/game"
+	"encoding/json"
 	"fmt"
 	"net"
+	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 var UDPServer net.PacketConn
 var TCPServer net.Listener
 
 func init() {
-	_, err := net.ListenPacket("udp", ":1234")
+	UDPServer, err := net.ListenPacket("udp", ":1234")
 	if err != nil {
 		panic(err)
 	}
-	// logrus.Println(UDPServer.ReadFrom)
+	for i := 0; i < 10; i++ {
+		go UDPListen(UDPServer)
+	}
 	TCPServer, err = net.Listen("tcp", ":4321")
 	if err != nil {
 		panic(err)
+	}
+}
+
+func UDPListen(UDPServer net.PacketConn) {
+	buffer := make([]byte, 1024)
+	for {
+		n, addr, err := UDPServer.ReadFrom(buffer)
+		if err != nil {
+			logrus.Errorf("Error from %s, %s", addr.String(), err)
+		}
+		decodeUDP(buffer[:n], addr)
 	}
 
 }
@@ -34,15 +51,15 @@ func TCPListen() {
 
 func handleTCP(conn net.Conn) {
 	user := game.NewUser(conn)
-
-	user.MQ <- createMsgString("USERINFO", user.ToString())
+	fmt.Println(conn.RemoteAddr().String())
+	user.TCPMQ <- createMsgString("USERINFO", user.ToString())
 	game.Users.Mux.Lock()
 	for k, other := range game.Users.Users {
 		if k == user.ID {
 			continue
 		}
-		user.MQ <- createMsgString("NEWUSER", other.ToString())
-		other.MQ <- createMsgString("NEWUSER", user.ToString())
+		user.TCPMQ <- createMsgString("NEWUSER", other.ToString())
+		other.TCPMQ <- createMsgString("NEWUSER", user.ToString())
 	}
 	game.Users.Mux.Unlock()
 	go user.HandleRead()
@@ -51,6 +68,23 @@ func handleTCP(conn net.Conn) {
 
 func createMsgString(header string, msg string) string {
 	return fmt.Sprintf("%s;%s\n", header, msg)
+}
+
+func decodeUDP(bytes []byte, addr net.Addr) {
+	str := string(bytes)
+	tokens := strings.Split(str, ";")
+	if tokens[0] == "POS" {
+		var move game.MoveInfo
+		err := json.Unmarshal([]byte(tokens[1]), &move)
+		if err != nil {
+			logrus.Error(err)
+		}
+		game.Users.Mux.Lock()
+		user := game.Users.Users[move.ID]
+		user.MoveMQ <- tokens[1]
+		user.UDPaddr = addr
+		game.Users.Mux.Unlock()
+	}
 }
 
 // func createMsgString(header string, msg string) string {

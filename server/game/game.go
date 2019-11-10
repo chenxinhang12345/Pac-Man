@@ -10,3 +10,9 @@ type UsersLookUP struct {
 var Users = UsersLookUP{
 	Users: make(map[int]User),
 }
+
+type MoveInfo struct {
+	ID int
+	X  int
+	Y  int
+}

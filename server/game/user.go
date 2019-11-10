@@ -12,13 +12,14 @@ import (
 )
 
 type User struct {
-	ID    int
-	X     int
-	Y     int
-	Color int
-	Score int
-	Conn  net.Conn
-	MQ    chan string
+	ID      int
+	X       int
+	Y       int
+	Color   int
+	Score   int
+	Conn    net.Conn
+	UDPaddr net.Addr
+	TCPMQ   chan string
 }
 
 func NewUser(conn net.Conn) User {
@@ -33,7 +34,7 @@ func NewUser(conn net.Conn) User {
 		Y:     rand.Intn(500),
 		Conn:  conn,
 		Color: -rand.Intn(16777215),
-		MQ:    make(chan string, 1024),
+		TCPMQ: make(chan string, 1024),
 	}
 	Users.Users[id] = user
 	Users.Mux.Unlock()
@@ -60,7 +61,7 @@ func (user User) HandleWrite() {
 	writer := bufio.NewWriter(user.Conn)
 	for {
 		select {
-		case msg := <-user.MQ:
+		case msg := <-user.TCPMQ:
 			writer.Write([]byte(msg))
 			writer.Flush()
 		}
