@@ -13,10 +13,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        try {
-            setContentView(new GamePanel(this));
-        }catch( Exception e){
-            e.printStackTrace();
-        }
+
+        setContentView(new GamePanel(this));
+
     }
 }
