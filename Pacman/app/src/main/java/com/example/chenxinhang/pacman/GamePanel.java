@@ -27,7 +27,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 //        player1Point = new Point(150,150);
         player2Point = new Point(200,200);
         try {
-            playerClient = new Client();
+            playerClient = new Client("10.0.2.2");
             while(playerClient.receivedBytes.equals("None")){
                 System.out.println("waiting");
             }

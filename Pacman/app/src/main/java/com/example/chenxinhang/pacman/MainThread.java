@@ -9,7 +9,6 @@ public class MainThread extends Thread {
     private SurfaceHolder surfaceHolder;
     private boolean running;
     public static Canvas canvas;
-    private double averageFPS;
 
     public MainThread(SurfaceHolder surfaceHolder, GamePanel gamePanel){
         super();
@@ -21,8 +20,6 @@ public class MainThread extends Thread {
         long startTime;
         long timeMillis;
         long waitTime;
-        int frameCount;
-        long totalTime = 0;
         long targetTime = 1000/MAX_FPS;
         while(running){
             startTime = System.nanoTime();
