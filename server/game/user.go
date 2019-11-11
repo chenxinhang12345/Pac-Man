@@ -22,6 +22,7 @@ type User struct {
 }
 
 func NewUser(conn net.Conn) User {
+	rand.Seed(int64(time.Now().Second()))
 	id := rand.Intn(1000)
 	Users.Mux.Lock()
 	for _, ok := Users.Users[id]; ok == true; id = rand.Intn(1000) {
