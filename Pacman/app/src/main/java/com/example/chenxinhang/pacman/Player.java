@@ -34,10 +34,16 @@ public class Player implements GameObject {
         return yPos;
     }
 
+    public void setxPos(int xPos){ this.xPos = xPos; }
+
+    public void setyPos(int yPos){this.yPos = yPos;}
+
     public void setColor(int color){
         this.color = color;
     }
-
+    public int getID(){
+        return this.ID;
+    }
     public int getColor(){
         return color;
     }
@@ -52,7 +58,7 @@ public class Player implements GameObject {
 
     @Override
     public void update(){
-
+        changePosition(xPos,yPos);
     }
 
     public void changePosition(int x, int y){

@@ -15,6 +15,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Random;
 
 public class Client {
     DatagramSocket ds;
@@ -77,7 +78,9 @@ public class Client {
 
     public String receive() throws IOException {
         this.DPreceive = new DatagramPacket(receiveBuf, receiveBuf.length, ip, UDP_SERVER_PORT);
+
         ds.receive(DPreceive);
+        System.out.println("receive");
         String data = new String(DPreceive.getData(), 0, DPreceive.getLength());
         System.out.println(data);
         return data;
@@ -106,7 +109,7 @@ public class Client {
         }
         //initialization finished
         String Bytes = playerClient.receivedBytes;
-        System.out.printf(Bytes);
+        System.out.println(Bytes);
         String [] list = Bytes.split(":|,|;",3);
         System.out.println(list.length);
         System.out.println("ID: " +list[1]);
@@ -114,6 +117,7 @@ public class Client {
         while(true) {
             playerClient.send(5, 5, ID);
             playerClient.receive();
+            System.out.println("send");
         }
     }
 }
