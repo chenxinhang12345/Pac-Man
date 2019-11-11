@@ -37,16 +37,19 @@ public class Client  {
             public void run() {
                 try  {
                     socket = new Socket(ip, TCP_SERVER_PORT);
+                    socket.setKeepAlive(true);
                     outToServer = new DataOutputStream(socket.getOutputStream());
                     inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String Bytes;
-                        while ((Bytes = inFromServer.readLine()) != null ) {
-                            System.out.println(Bytes);
-                            String[] stringlist = Bytes.split(";",2);
-                            if(stringlist[0].equals("USERINFO")){
-                                receivedBytes = stringlist[1];
-                            }else if(stringlist[0].equals("NEWUSER")){
-                                newUser = stringlist[1];
+                        while (true) {
+                            if((Bytes = inFromServer.readLine()) != null ) {
+                                System.out.println(Bytes);
+                                String[] stringlist = Bytes.split(";", 2);
+                                if (stringlist[0].equals("USERINFO")) {
+                                    receivedBytes = stringlist[1];
+                                } else if (stringlist[0].equals("NEWUSER")) {
+                                    newUser = stringlist[1];
+                                }
                             }
                         }
 
