@@ -60,6 +60,7 @@ func UDPListen(UDPServer net.PacketConn) {
 }
 
 func TCPListen() {
+	game.InitializeFood()
 	for {
 		conn, err := TCPServer.Accept()
 		if err != nil {
@@ -71,8 +72,10 @@ func TCPListen() {
 
 func handleTCP(conn net.Conn) {
 	user := game.NewUser(conn)
-	fmt.Println(conn.RemoteAddr().String())
+	logrus.Infof("A new player come in: %s\n", conn.RemoteAddr())
 	user.TCPMQ <- createMsgString("USERINFO", user.ToString())
+	foodListString := game.Foods.ToStringList()
+	game.DistributeFood(foodListString)
 	game.Users.Mux.Lock()
 	for k, other := range game.Users.Users {
 		if k == user.ID {

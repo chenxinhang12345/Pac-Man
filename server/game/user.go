@@ -44,7 +44,7 @@ func NewUser(conn net.Conn) User {
 func (user User) HandleRead() {
 	reader := bufio.NewReader(user.Conn)
 	for {
-		user.Conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+		user.Conn.SetReadDeadline(time.Now().Add(600 * time.Second))
 		str, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
@@ -53,7 +53,7 @@ func (user User) HandleRead() {
 			}
 			logrus.Errorln("Error when read from TCP", err)
 		}
-		logrus.Println(str)
+		decodeTCPMsg(str)
 	}
 }
 
@@ -91,4 +91,20 @@ func (user User) ToBytes() []byte {
 		panic(err)
 	}
 	return userMarshal
+}
+
+func (user User) GetScoreBytes() []byte {
+	score := Score{
+		ID:    user.ID,
+		Score: user.Score,
+	}
+	bytes, err := json.Marshal(score)
+	if err != nil {
+		panic(err)
+	}
+	return bytes
+}
+
+func (user User) GetScoreString() string {
+	return string(user.GetScoreBytes())
 }
