@@ -10,7 +10,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// UDPServer is the listening entry point for UDP packets
 var UDPServer net.PacketConn
+
+// TCPServer is the listening entry point for TCP connection
 var TCPServer net.Listener
 var udpTable = map[int]net.Addr{}
 var udpMQ chan game.MovePacket
@@ -32,6 +35,7 @@ func init() {
 
 }
 
+// UDPWrite receive msgs from the channel
 func UDPWrite(UDPServer net.PacketConn) {
 	for {
 		select {
@@ -53,7 +57,6 @@ func UDPListen(UDPServer net.PacketConn) {
 		if err != nil {
 			logrus.Errorf("Error from %s, %s", addr.String(), err)
 		}
-		fmt.Println(string(buffer[:n]))
 		decodeUDP(buffer[:n], addr)
 	}
 
@@ -101,7 +104,9 @@ func decodeUDP(bytes []byte, addr net.Addr) {
 		if err := json.Unmarshal([]byte(tokens[1]), &move); err != nil {
 			logrus.Error(err)
 		}
-		udpTable[move.ID] = addr
+		if _, ok := udpTable[move.ID]; !ok {
+			udpTable[move.ID] = addr
+		}
 		distributeMove(tokens[1])
 	}
 }
@@ -111,7 +116,6 @@ func distributeMove(move string) {
 	if err := json.Unmarshal([]byte(move), &moveInfo); err != nil {
 		logrus.Error(err)
 	}
-	fmt.Println(udpTable)
 	for k, v := range udpTable {
 		if k == moveInfo.ID {
 			continue
