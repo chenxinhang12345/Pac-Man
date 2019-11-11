@@ -19,22 +19,43 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private Point player1Point;
     private Point player2Point;
     private Client playerClient;
+    private Thread receiveThread;
 
     public GamePanel(Context context) {
         super(context);
         getHolder().addCallback(this);
         thread = new MainThread(getHolder(), this);
 //        player1Point = new Point(150,150);
-        player2Point = new Point(200,200);
+        player2Point = new Point(200, 200);
         try {
             playerClient = new Client("10.0.2.2");
-            while(playerClient.receivedBytes.equals("None")){
+            while (playerClient.receivedBytes.equals("None")) {
                 System.out.println("waiting");
             }
             parseInfo(playerClient.receivedBytes);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        receiveThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        playerClient.send(player1.getxPos(), player1.getyPos(), player1.getID());
+//                        String data = playerClient.receive();
+//                        System.out.println(data);
+//                        String pos = data.split(";")[1];
+//                        JSONObject obj = new JSONObject(pos);
+//                        int x = obj.getInt("X");
+//                        int y = obj.getInt("Y");
+//                        player2.changePosition(x, y);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        receiveThread.start();
         setFocusable(true);
     }
 
@@ -42,16 +63,17 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
     }
-    public void parseInfo(String info){
+
+    public void parseInfo(String info) {
         try {
             JSONObject obj = new JSONObject(info);
             int X = obj.getInt("X");
             int Y = obj.getInt("Y");
             int ID = obj.getInt("ID");
             int color = obj.getInt("Color");
-            player1 = new Player( color , X,Y,50,50, 10,ID);
-            player1Point = new Point(X,Y);
-            while(playerClient.newUser.equals("None")){
+            player1 = new Player(color, X, Y, 50, 50, 10, ID);
+            player1Point = new Point(X, Y);
+            while (playerClient.newUser.equals("None")) {
                 System.out.println("wait another player...");
             }
             JSONObject objUser = new JSONObject(playerClient.newUser);
@@ -59,15 +81,16 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             int Y2 = objUser.getInt("Y");
             int ID2 = objUser.getInt("ID");
             int color2 = objUser.getInt("Color");
-            player2 = new Player(color2,X2,Y2,50,50,20,ID2);
-            player2Point = new Point(X2,Y2);
+            player2 = new Player(color2, X2, Y2, 50, 50, 10, ID2);
+            player2Point = new Point(X2, Y2);
             System.out.println(X);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         thread = new MainThread(getHolder(), this);
@@ -82,39 +105,41 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             try {
                 thread.setRunning(false);
                 thread.join();
+                receiveThread.join();
             } catch (Exception e) {
                 e.printStackTrace();
                 retry = false;
             }
         }
     }
+
     @Override
-    public boolean onTouchEvent(MotionEvent event){
-        switch (event.getAction()){
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                player1Point.set((int)event.getX(),(int)event.getY());
-                player2Point.set((int)event.getX(),(int)event.getY());
+                int XPos = (int) event.getX();
+                int YPos = (int) event.getY();
+                player1Point.set(XPos, YPos);
+//                try {
+//                    playerClient.send(XPos, YPos, player1.getID());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
 //                System.out.println((int)event.getX());
         }
         return true;
 
     }
 
-    public void update(){
+    public void update() {
         player1.update(player1Point);
-        player2.update(player2Point);
-//        try {
-//            playerClient.send(player1.getxPos(), player1.getyPos());
-//            String data = playerClient.receive();
-//            System.out.println("receive:"+data);
-////            System.out.println("1");
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
+
+
     }
+
     @Override
-    public void draw(Canvas canvas){
+    public void draw(Canvas canvas) {
         super.draw(canvas);
         canvas.drawColor(Color.YELLOW);
         player1.draw(canvas);
