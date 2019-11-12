@@ -42,13 +42,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 while(true) {
                     try {
                         playerClient.send(player1.getxPos(), player1.getyPos(), player1.getID());
-//                        String data = playerClient.receive();
-//                        System.out.println(data);
-//                        String pos = data.split(";")[1];
-//                        JSONObject obj = new JSONObject(pos);
-//                        int x = obj.getInt("X");
-//                        int y = obj.getInt("Y");
-//                        player2.changePosition(x, y);
+                        String data = playerClient.receive();
+                        System.out.println(data);
+                        JSONObject obj = new JSONObject(data);
+                        int x = obj.getInt("X");
+                        int y = obj.getInt("Y");
+                        player2.changePosition(x, y);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
