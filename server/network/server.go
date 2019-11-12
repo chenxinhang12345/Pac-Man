@@ -57,6 +57,7 @@ func UDPListen(UDPServer net.PacketConn) {
 		if err != nil {
 			logrus.Errorf("Error from %s, %s", addr.String(), err)
 		}
+		fmt.Println(string(buffer[:n]))
 		decodeUDP(buffer[:n], addr)
 	}
 
