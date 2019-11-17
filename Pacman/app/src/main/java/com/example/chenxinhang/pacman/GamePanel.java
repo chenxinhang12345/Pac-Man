@@ -1,53 +1,82 @@
 package com.example.chenxinhang.pacman;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
+import static java.lang.Thread.sleep;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
-    private MainThread thread;
-    private Player player1;
-    private Player player2;
-    private Point player1Point;
-    private Point player2Point;
-    private Client playerClient;
-    private Thread receiveThread;
+    private MainThread thread;// thread that control first player and rendering
+    private Player player1;// first player (main player)
+    public Player player2;// second player
+    public HashMap<Integer,Player> players;//new added players
+    private Point player1Point;// navigation point for main user
+    private Client playerClient;// client for receiving data
+    private Thread receiveThread;// thread for updating second player position
+    private HashMap<Integer,Food> food;
+    private Wall wall;
 
     public GamePanel(Context context) {
         super(context);
         getHolder().addCallback(this);
+        food = new HashMap<>();
+        players = new HashMap<>();
+        wall = new Wall();
         thread = new MainThread(getHolder(), this);
-//        player1Point = new Point(150,150);
-        player2Point = new Point(200, 200);
         try {
-            playerClient = new Client("10.0.2.2");
+//            playerClient = new Client("18.217.81.167");
+//            playerClient  = new Client("10.180.157.40");
+            playerClient = new Client("10.0.2.2", this);
             while (playerClient.receivedBytes.equals("None")) {
                 System.out.println("waiting");
             }
             parseInfo(playerClient.receivedBytes);
+            while(playerClient.food.equals("None")){
+                System.out.println("waiting food");
+            }
+            initializeFood(playerClient.food);
+            System.out.println(playerClient.food);
         } catch (Exception e) {
             e.printStackTrace();
         }
         receiveThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(true) {
+                while (true) {
                     try {
+                        sleep(50);
                         playerClient.send(player1.getxPos(), player1.getyPos(), player1.getID());
                         String data = playerClient.receive();
-                        System.out.println(data);
                         JSONObject obj = new JSONObject(data);
                         int x = obj.getInt("X");
                         int y = obj.getInt("Y");
-                        player2.changePosition(x, y);
+                        if(players.size()<1) {
+                            player2.changePosition(x, y);
+                        }else{
+                           int ID = obj.getInt("ID");
+                           if(player2.getID()==ID){
+                               player2.changePosition(x,y);
+                           }else{
+                               if(players.containsKey(ID)) {
+                                   players.get(ID).changePosition(x, y);
+                               }
+                           }
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -58,11 +87,32 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         setFocusable(true);
     }
 
+
+    public void initializeFood(String food){
+        try {
+            JSONArray arr = new JSONArray(food);
+            for (int i = 0; i< arr.length();i++){
+                String json = arr.getString(i);
+                JSONObject obj = new JSONObject(json.substring(json.indexOf("{"), json.lastIndexOf("}") + 1));
+                int X = obj.getInt("X");
+                int Y = obj.getInt("Y");
+                int ID = obj.getInt("ID");
+                this.food.put(ID,new Food(X,Y));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
     }
 
+    /**
+     * parse information from initialization in json format
+     *
+     * @param info
+     */
     public void parseInfo(String info) {
         try {
             JSONObject obj = new JSONObject(info);
@@ -70,25 +120,48 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             int Y = obj.getInt("Y");
             int ID = obj.getInt("ID");
             int color = obj.getInt("Color");
-            player1 = new Player(color, X, Y, 50, 50, 10, ID);
+            player1 = new Player(color, X, Y, 50, 50, 20, ID,this);
             player1Point = new Point(X, Y);
             while (playerClient.newUser.equals("None")) {
                 System.out.println("wait another player...");
             }
-            JSONObject objUser = new JSONObject(playerClient.newUser);
-            int X2 = objUser.getInt("X");
-            int Y2 = objUser.getInt("Y");
-            int ID2 = objUser.getInt("ID");
-            int color2 = objUser.getInt("Color");
-            player2 = new Player(color2, X2, Y2, 50, 50, 10, ID2);
-            player2Point = new Point(X2, Y2);
-            System.out.println(X);
-
+//            JSONObject objUser = new JSONObject(playerClient.newUser);
+//            int X2 = objUser.getInt("X");
+//            int Y2 = objUser.getInt("Y");
+//            int ID2 = objUser.getInt("ID");
+//            int color2 = objUser.getInt("Color");
+//            player2 = new Player(color2, X2, Y2, 50, 50, 20, ID2,this);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
+    public void parseInfoAddPlayer2(String info){
+        try {
+            JSONObject objUser = new JSONObject(info);
+            int X2 = objUser.getInt("X");
+            int Y2 = objUser.getInt("Y");
+            int ID2 = objUser.getInt("ID");
+            int color2 = objUser.getInt("Color");
+            player2 = new Player(color2, X2, Y2, 50, 50, 20, ID2, this);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void parseInfoAddNewUser(String info){
+        try {
+            JSONObject objUser = new JSONObject(info);
+            int X = objUser.getInt("X");
+            int Y = objUser.getInt("Y");
+            int ID = objUser.getInt("ID");
+            int color = objUser.getInt("Color");
+            Player player = new Player(color, X, Y, 50, 50, 20, ID, this);
+            players.put(player.getID(),player);
+        }catch (Exception e){
+
+        }
+    }
+
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -99,7 +172,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        boolean retry = true;
         while (true) {
             try {
                 thread.setRunning(false);
@@ -107,7 +179,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 receiveThread.join();
             } catch (Exception e) {
                 e.printStackTrace();
-                retry = false;
             }
         }
     }
@@ -119,13 +190,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             case MotionEvent.ACTION_MOVE:
                 int XPos = (int) event.getX();
                 int YPos = (int) event.getY();
-                player1Point.set(XPos, YPos);
-//                try {
-//                    playerClient.send(XPos, YPos, player1.getID());
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                System.out.println((int)event.getX());
+                player1Point.set(XPos, YPos);// whenever user touch a point, the pacman will follow that point
         }
         return true;
 
@@ -137,11 +202,31 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     }
 
+    public void obstacle(){
+        food.entrySet().removeIf(e->(e.getValue().getRectangle().intersect(player1.getRectangle())));
+        food.entrySet().removeIf(e->(e.getValue().getRectangle().intersect(player2.getRectangle())));
+        if(wall.getLogicRectangle().intersect(player1.getRectangle())){
+            player1.undoMove();
+            System.out.println("1");
+        }
+
+    }
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        canvas.drawColor(Color.YELLOW);
-        player1.draw(canvas);
-        player2.draw(canvas);
+        canvas.drawColor(Color.WHITE);
+        obstacle();
+        player1.draw(canvas);//draw player1
+        player2.draw(canvas);//draw player2
+        if(players.size()>0){
+            for(Player player : players.values()){
+                player.draw(canvas);
+            }
+        }
+        for (Food food : food.values()){
+//            System.out.println(food.getRectangle().bottom);
+            food.draw(canvas);
+        }
+        wall.draw(canvas);
     }
 }
