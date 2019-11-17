@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,4 +24,23 @@ public class ExampleInstrumentedTest {
 
         assertEquals("com.example.chenxinhang.pacman", appContext.getPackageName());
     }
+    @Test
+    public void data_Parsing(){
+        try {
+            String info = "{\"ID\":3,\"X\":5,\"Y\":6}";
+            JSONObject obj = new JSONObject(info);
+            int X = obj.getInt("X");
+            int Y = obj.getInt("Y");
+            int ID = obj.getInt("ID");
+            int color = obj.getInt("Color");
+            assertEquals(X,5);
+            assertEquals(Y,6);
+            assertEquals(ID,3);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
 }
