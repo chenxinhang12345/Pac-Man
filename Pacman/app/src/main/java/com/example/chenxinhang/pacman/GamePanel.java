@@ -191,6 +191,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 int XPos = (int) event.getX();
                 int YPos = (int) event.getY();
                 player1Point.set(XPos, YPos);// whenever user touch a point, the pacman will follow that point
+
         }
         return true;
 
