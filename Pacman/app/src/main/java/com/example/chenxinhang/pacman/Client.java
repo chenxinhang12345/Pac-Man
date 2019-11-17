@@ -21,15 +21,19 @@ public class Client {
     String newUser = "None";
     String food = "None";
     String SERVER_IP;
+    boolean twoPlayerJoined;
+    GamePanel gamePanel;
     public static final int TCP_SERVER_PORT = 4321;
     public static final int UDP_SERVER_PORT = 1234;
 
-    public Client(String SERVER_IP) throws IOException {
+    public Client(String SERVER_IP, GamePanel gamePanel) throws IOException {
         this.ds = new DatagramSocket();
         this.SERVER_IP = SERVER_IP;
         this.ip = InetAddress.getByName(SERVER_IP);
         this.buf = null;
         this.receiveBuf = new byte[256];
+        this.twoPlayerJoined= false;
+        this.gamePanel = gamePanel;
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -42,10 +46,16 @@ public class Client {
                     while (true) {
                         if ((Bytes = inFromServer.readLine()) != null) {
                             String[] stringlist = Bytes.split(";", 2);
-                            if (stringlist[0].equals("USERINFO")) {
+                            if (stringlist[0].equals("USERINFO")){
                                 receivedBytes = stringlist[1];
-                            } else if (stringlist[0].equals("NEWUSER")) {
+                            } else if (stringlist[0].equals("NEWUSER")){
                                 newUser = stringlist[1];
+                                if(twoPlayerJoined){
+                                    gamePanel.parseInfoAddNewUser(newUser);
+                                }else{
+                                    gamePanel.parseInfoAddPlayer2(newUser);
+                                }
+                                twoPlayerJoined = true;
                             }else if (stringlist[0].equals("FOOD")){
                                 food = stringlist[1];
                             }
@@ -77,19 +87,19 @@ public class Client {
     }
 
     public static void main(String args[]) throws Exception {
-        Client playerClient = new Client("localhost");
-
-        while(playerClient.receivedBytes.equals("None")){
-
-        }
-        //initialization finished
-        String Bytes = playerClient.receivedBytes;
-        String [] list = Bytes.split(":|,|;",3);
-        int ID = Integer.valueOf(list[1]);
-        while(true) {
-            playerClient.send(5, 5, ID);
-            playerClient.receive();
-        }
+//        Client playerClient = new Client("localhost");
+//
+//        while(playerClient.receivedBytes.equals("None")){
+//
+//        }
+//        //initialization finished
+//        String Bytes = playerClient.receivedBytes;
+//        String [] list = Bytes.split(":|,|;",3);
+//        int ID = Integer.valueOf(list[1]);
+//        while(true) {
+//            playerClient.send(5, 5, ID);
+//            playerClient.receive();
+//        }
     }
 }
 
