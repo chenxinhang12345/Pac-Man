@@ -28,6 +28,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private Point player1Point;// navigation point for main user
     private Client playerClient;// client for receiving data
     private Thread receiveThread;// thread for updating second player position
+    private Thread sendThread;
     private HashMap<Integer,Food> food;
     private Wall wall;
 
@@ -39,7 +40,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         wall = new Wall();
         thread = new MainThread(getHolder(), this);
         try {
-//            playerClient = new Client("18.217.81.167");
+//            playerClient = new Client("18.217.81.167",this);
 //            playerClient  = new Client("10.180.157.40");
             playerClient = new Client("10.0.2.2", this);
             while (playerClient.receivedBytes.equals("None")) {
@@ -59,8 +60,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             public void run() {
                 while (true) {
                     try {
-                        sleep(50);
-                        playerClient.send(player1.getxPos(), player1.getyPos(), player1.getID());
                         String data = playerClient.receive();
                         JSONObject obj = new JSONObject(data);
                         int x = obj.getInt("X");
@@ -83,6 +82,20 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 }
             }
         });
+        sendThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        sleep(50);
+                        playerClient.send(player1.getxPos(), player1.getyPos(), player1.getID());
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        sendThread.start();
         receiveThread.start();
         setFocusable(true);
     }
