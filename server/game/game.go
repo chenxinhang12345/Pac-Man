@@ -16,6 +16,7 @@ func decodeTCPMsg(str string) {
 		if err := json.Unmarshal([]byte(tokens[1]), &eatinfo); err != nil {
 			logrus.Error(err)
 		}
+		fmt.Println(eatinfo)
 		handleEAT(eatinfo)
 	}
 }

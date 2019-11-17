@@ -70,3 +70,13 @@ func bytes2int(bytes []byte) int {
 	}
 	return value
 }
+
+// func TestMaze(t *testing.T) {
+// 	for i:=0; i < 3; i++ {
+// 		t.Run("Test maze construction", func( t *testing.T) {
+// 			// m := maze.NewMaze()
+// 			// m.SetUp()
+
+// 		}
+// 	}
+// }
