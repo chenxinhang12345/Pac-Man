@@ -61,6 +61,16 @@ func (ds DSet) Append(set Set) {
 	ds.setList = append(ds.setList, set)
 }
 
+func (ds DSet) Size() int {
+	count := 0
+	for _, set := range ds.setList {
+		if *set.parent == set {
+			count++
+		}
+	}
+	return count
+}
+
 func NewSet(cell Cell) Set {
 	set := Set{
 		data: cell,
@@ -69,10 +79,13 @@ func NewSet(cell Cell) Set {
 	return set
 }
 
-func NewDSet(cells []Cell) DSet {
+func NewDSet(cells [][]Cell) DSet {
 	ds := DSet{}
-	for _, cell := range cells {
-		ds.Append(NewSet(cell))
+	for _, rows := range cells {
+		for _, cell := range rows {
+			ds.Append(NewSet(cell))
+
+		}
 	}
 	return ds
 }

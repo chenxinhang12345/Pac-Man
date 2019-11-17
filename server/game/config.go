@@ -50,8 +50,8 @@ var Foods = FoodsLookUP{
 
 // EatInfo is the data scheme from the player
 type EatInfo struct {
-	ID     int `json:"player_id"`
-	FoodID int `json:"food_id"`
+	ID     int
+	FoodID int
 }
 
 type Score struct {

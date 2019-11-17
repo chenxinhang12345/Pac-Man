@@ -1,5 +1,7 @@
 package maze
 
+import "math/rand"
+
 type Cell struct {
 	Top    bool
 	Bottom bool
@@ -27,7 +29,7 @@ const (
 )
 
 type Maze struct {
-	Cells []Cell
+	Cells [][]Cell
 	Edges []Edge
 }
 
@@ -40,14 +42,73 @@ func NewEdge(cell1, cell2 Cell, pos POS) Edge {
 }
 
 func NewMaze() (m Maze) {
+	m.Cells = make([][]Cell, height)
+	for row := 0; row < height; row++ {
+		m.Cells[row] = make([]Cell, width)
+	}
 	for row := 0; row < height; row++ {
 		for col := 0; col < width; col++ {
 			m.AppendCell(NewCell(row, col))
+		}
+	}
+	for _, rows := range m.Cells {
+		for _, cell1 := range rows {
+			for _, cols := range m.Cells {
+				for _, cell2 := range cols {
+					m.AddEdge(NewEdge(cell1, cell2, T))
+					m.AddEdge(NewEdge(cell1, cell2, L))
+				}
+			}
 		}
 	}
 	return
 }
 
 func (m Maze) AppendCell(cell Cell) {
-	m.Cells = append(m.Cells, cell)
+	m.Cells[cell.Row][cell.Col] = cell
+}
+
+func (m Maze) AddEdge(edge Edge) {
+	m.Edges = append(m.Edges, edge)
+}
+
+func (m Maze) SetUp() {
+	cellSet := NewDSet(m.Cells)
+	for cellSet.Size() != 1 {
+		// Remove random edge
+		edgeN := rand.Intn(len(m.Edges))
+		wall := m.Edges[edgeN]
+		m.Edges = append(m.Edges[:edgeN], m.Edges[edgeN+1:]...)
+		row := wall.Cell1.Row
+		col := wall.Cell1.Col
+		cell1 := m.FindCellByCoord(row, col)
+		cell2 := m.FindCellByCoord(row, col-1)
+		// Check whether the cells are in the same connected component
+		// If not connect them
+		if row > 0 && wall.Pos == L && cellSet.Find(*cell1) != cellSet.Find(*cell2) {
+			cellSet.Union(*cell1, *cell2)
+			cell1.Left = false
+			cell2.Right = false
+		}
+
+		cell2 = m.FindCellByCoord(row-1, col)
+		// Check whether the cells are in the same connected component
+		// If not connect them
+		if col > 0 && wall.Pos == T && cellSet.Find(*cell1) != cellSet.Find(*cell2) {
+			cellSet.Union(*cell1, *cell2)
+			cell1.Top = false
+			cell2.Bottom = false
+		}
+	}
+}
+
+func (m Maze) FindCellByCoord(row, col int) *Cell {
+	for x, rows := range m.Cells {
+		for y, cell := range rows {
+			if x == row && y == col {
+				return &cell
+			}
+		}
+	}
+	return nil
 }
