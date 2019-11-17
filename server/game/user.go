@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// User is to store all information about a player
 type User struct {
 	ID    int
 	X     int
@@ -21,6 +22,8 @@ type User struct {
 	TCPMQ chan string
 }
 
+// NewUser will create a new user according to the connection
+// User will keep alive the connection
 func NewUser(conn net.Conn) User {
 	rand.Seed(int64(time.Now().Second()))
 	id := rand.Intn(1000)
@@ -41,6 +44,7 @@ func NewUser(conn net.Conn) User {
 	return user
 }
 
+// HandleRead is to continuly read from the TCP connection.
 func (user User) HandleRead() {
 	reader := bufio.NewReader(user.Conn)
 	for {
@@ -57,6 +61,8 @@ func (user User) HandleRead() {
 	}
 }
 
+// HandleWrite is to write the msg from channel to TCP connection
+// Each user will have a distinct TCP channel queue.
 func (user User) HandleWrite() {
 	writer := bufio.NewWriter(user.Conn)
 	for {
@@ -68,10 +74,12 @@ func (user User) HandleWrite() {
 	}
 }
 
+// ToString is to format user data to string
 func (user User) ToString() string {
 	return string(user.ToBytes())
 }
 
+// ToBytes is to format user data to bytes
 func (user User) ToBytes() []byte {
 	info := struct {
 		ID    int
@@ -93,6 +101,7 @@ func (user User) ToBytes() []byte {
 	return userMarshal
 }
 
+// GetScoreBytes is to format user score data to bytes
 func (user User) GetScoreBytes() []byte {
 	score := Score{
 		ID:    user.ID,
@@ -105,6 +114,7 @@ func (user User) GetScoreBytes() []byte {
 	return bytes
 }
 
+// GetScoreString is to format user score data to string
 func (user User) GetScoreString() string {
 	return string(user.GetScoreBytes())
 }

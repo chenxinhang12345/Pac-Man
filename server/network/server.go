@@ -16,13 +16,14 @@ var UDPServer net.PacketConn
 // TCPServer is the listening entry point for TCP connection
 var TCPServer net.Listener
 var udpTable = map[int]net.Addr{}
-var udpMQ chan game.MovePacket
+var udpMQ = make(chan game.MovePacket, 1024)
 
 func init() {
 	UDPServer, err := net.ListenPacket("udp", ":1234")
 	if err != nil {
 		panic(err)
 	}
+	// Create total 20 goroutines for UDP read/write
 	for i := 0; i < 10; i++ {
 		go UDPListen(UDPServer)
 		go UDPWrite(UDPServer)
@@ -31,12 +32,13 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	udpMQ = make(chan game.MovePacket, 1024)
-
 }
 
 // UDPWrite receive msgs from the channel
 func UDPWrite(UDPServer net.PacketConn) {
+	// This function is run by a goroutine
+	// It will continuely read data from channel
+	// All data gram via UDP should go through this channel
 	for {
 		select {
 		case msg := <-udpMQ:
@@ -50,19 +52,22 @@ func UDPWrite(UDPServer net.PacketConn) {
 	}
 }
 
+// UDPListen will read from udp packets
 func UDPListen(UDPServer net.PacketConn) {
+	// This function is run by a goroutine
+	// It will continuely read data from UDP
 	buffer := make([]byte, 1024)
 	for {
 		n, addr, err := UDPServer.ReadFrom(buffer)
 		if err != nil {
 			logrus.Errorf("Error from %s, %s", addr.String(), err)
 		}
-		fmt.Println(string(buffer[:n]))
 		decodeUDP(buffer[:n], addr)
 	}
 
 }
 
+// TCPListen will accept any connectin and start a new routine for IO
 func TCPListen() {
 	game.InitializeFood()
 	for {
@@ -74,6 +79,7 @@ func TCPListen() {
 	}
 }
 
+// handleTCP will handle each connection accepted by TCP via separate goroutine
 func handleTCP(conn net.Conn) {
 	user := game.NewUser(conn)
 	logrus.Infof("A new player come in: %s\n", conn.RemoteAddr())
@@ -93,10 +99,12 @@ func handleTCP(conn net.Conn) {
 	go user.HandleWrite()
 }
 
+// creteMsgString will construct a msg with the header and msg
 func createMsgString(header string, msg string) string {
 	return fmt.Sprintf("%s;%s\n", header, msg)
 }
 
+// decodeUDP will decode the UDP packet and find the data info
 func decodeUDP(bytes []byte, addr net.Addr) {
 	str := string(bytes)
 	tokens := strings.Split(str, ";")
@@ -112,6 +120,7 @@ func decodeUDP(bytes []byte, addr net.Addr) {
 	}
 }
 
+// distributeMove will pass-on player's move to other players
 func distributeMove(move string) {
 	var moveInfo game.MoveInfo
 	if err := json.Unmarshal([]byte(move), &moveInfo); err != nil {
@@ -128,15 +137,3 @@ func distributeMove(move string) {
 		udpMQ <- msg
 	}
 }
-
-// func createMsgString(header string, msg string) string {
-// 	// Append header verb
-// 	data := header + "\n"
-// 	// Append msg length
-// 	length := make([]byte, 8)
-// 	binary.BigEndian.PutUint64(length, uint64(len(msg)))
-// 	data = string(append([]byte(data), length...))
-// 	// Append msg
-// 	data += msg
-// 	return data
-// }
