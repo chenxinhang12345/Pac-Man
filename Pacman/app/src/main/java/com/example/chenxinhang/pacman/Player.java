@@ -13,14 +13,18 @@ public class Player implements GameObject {
     private Point target;
     private int xPos;
     private int yPos;
-    private int height;
-    private int width;
+    private int oldxPos;
+    private int oldyPos;
     private int speed;
+    public GamePanel gamePanel;
 
-    public Player( int color,int xPos,int yPos,int width, int height,int speed,int ID){
+    public Player( int color,int xPos,int yPos,int width, int height,int speed,int ID, GamePanel gamePanel){
+        this.gamePanel = gamePanel;
         this.color = color;
         this.xPos = xPos;
         this.yPos = yPos;
+        this.oldxPos = xPos;
+        this.oldyPos = yPos;
         this.rectangle = new Rect(xPos-width/2,yPos-height/2,xPos+width/2,yPos+height/2);
         this.speed = speed;
         this.ID = ID;
@@ -47,18 +51,22 @@ public class Player implements GameObject {
     public int getColor(){
         return color;
     }
+
+    public void undoMove(){
+        xPos = oldxPos;
+        yPos = oldyPos;
+        changePosition(xPos,yPos);
+    }
+
+    public Rect getRectangle() {
+        return rectangle;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         Paint paint = new Paint();
         paint.setColor(color);
         canvas.drawRect(rectangle,paint);
-//        System.out.println(rectangle.height()+", "+rectangle.width());
-//        System.out.println(rectangle.left);
-    }
-
-    @Override
-    public void update(){
-        changePosition(xPos,yPos);
     }
 
     public void changePosition(int x, int y){
@@ -72,16 +80,13 @@ public class Player implements GameObject {
         double displacement = Math.sqrt(xDiff*xDiff+yDiff*yDiff);
 
         if(Math.abs(xDiff)>=speed){
-//            xPos+=(target.x-xPos)/Math.abs(target.x-xPos)*speed;
+            oldxPos = xPos;
             xPos += speed*xDiff/displacement;
         }
         if(Math.abs(yDiff)>=speed){
-//            yPos+=(target.y-yPos)/Math.abs(target.y-yPos)*speed;
+            oldyPos = yPos;
             yPos += speed*yDiff/displacement;
         }
-
-
-//        rectangle.set(point.x-rectangle.width()/2,point.y-rectangle.height()/2,point.x+rectangle.width()/2,point.y+rectangle.height()/2);
         changePosition(xPos,yPos);
     }
 
