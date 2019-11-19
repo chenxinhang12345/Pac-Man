@@ -127,8 +127,8 @@ func (m *Maze) ToBytes() []byte {
 	type coord struct {
 		X0 int
 		X1 int
-		y0 int
-		y1 int
+		Y0 int
+		Y1 int
 	}
 	collectRows := make([]coord, 1)
 	collectCols := make([]coord, 1)
