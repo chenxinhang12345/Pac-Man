@@ -1,6 +1,7 @@
 package game
 
 import (
+	"Pac-Man/server/maze"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -101,4 +102,9 @@ func InitializeFood() {
 		Foods.Foods[food.ID] = food
 	}
 	Foods.Mux.Unlock()
+}
+
+func InitializeMaze() {
+	Maze = maze.NewMaze()
+	Maze.SetUp()
 }

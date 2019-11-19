@@ -1,9 +1,15 @@
 package game
 
 import (
+	"Pac-Man/server/maze"
 	"encoding/json"
 	"net"
 	"sync"
+)
+
+const (
+	MazeHeight int = 1500
+	MazeWidth  int = 1300
 )
 
 // UsersLookUP stores all users infomaion
@@ -78,3 +84,5 @@ func (foodsTable FoodsLookUP) ToStringList() []string {
 	}
 	return foodList
 }
+
+var Maze *maze.Maze
