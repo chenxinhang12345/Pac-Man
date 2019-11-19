@@ -1,6 +1,7 @@
 package game
 
 import (
+	"Pac-Man/server/maze"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -40,18 +41,34 @@ func handleEAT(eat EatInfo) {
 		Foods.Foods[food.ID] = food
 		foodList := Foods.ToStringList()
 		DistributeFood(foodList)
-
+		distributeAddFood(food)
 	}
 	Foods.Mux.Unlock()
 }
 
 func generateFood() Food {
+	xCell := rand.Intn(maze.Width)
+	yCell := rand.Intn(maze.Height)
+	widthPart := MazeWidth / maze.Width
+	heightPart := MazeHeight / maze.Height
 	food := Food{
 		ID: rand.Intn(200),
-		X:  rand.Intn(500),
-		Y:  rand.Intn(500),
+		X:  xCell*widthPart + widthPart/2,
+		Y:  yCell*heightPart + heightPart/2,
 	}
 	return food
+}
+
+func distributeAddFood(food Food) {
+	bytes, err := json.Marshal(food)
+	if err != nil {
+		logrus.Error(err)
+	}
+	Users.Mux.Lock()
+	for _, user := range Users.Users {
+		user.TCPMQ <- createMsgString("ADDFOOD", string(bytes))
+	}
+	Users.Mux.Unlock()
 }
 
 func DistributeFood(foodList []string) {
@@ -84,9 +101,14 @@ func createMsgString(header string, msg string) string {
 
 func InitializeFood() {
 	Foods.Mux.Lock()
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 50; i++ {
 		food := generateFood()
 		Foods.Foods[food.ID] = food
 	}
 	Foods.Mux.Unlock()
+}
+
+func InitializeMaze() {
+	Maze = maze.NewMaze()
+	Maze.SetUp()
 }

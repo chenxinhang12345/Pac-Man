@@ -1,6 +1,7 @@
 package game
 
 import (
+	"Pac-Man/server/maze"
 	"bufio"
 	"encoding/json"
 	"io"
@@ -25,16 +26,20 @@ type User struct {
 // NewUser will create a new user according to the connection
 // User will keep alive the connection
 func NewUser(conn net.Conn) User {
-	rand.Seed(int64(time.Now().Second()))
+	rand.Seed(int64(time.Now().Nanosecond()))
 	id := rand.Intn(1000)
 	Users.Mux.Lock()
 	for _, ok := Users.Users[id]; ok == true; id = rand.Intn(1000) {
 		_, ok = Users.Users[id]
 	}
+	xCell := rand.Intn(maze.Width)
+	yCell := rand.Intn(maze.Height)
+	widthPart := MazeWidth / maze.Width
+	heightPart := MazeHeight / maze.Height
 	user := User{
 		ID:    id,
-		X:     rand.Intn(500),
-		Y:     rand.Intn(500),
+		X:     xCell*widthPart + widthPart/3,
+		Y:     yCell*heightPart + heightPart/3,
 		Conn:  conn,
 		Color: -rand.Intn(16777215),
 		TCPMQ: make(chan string, 1024),

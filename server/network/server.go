@@ -70,6 +70,7 @@ func UDPListen(UDPServer net.PacketConn) {
 // TCPListen will accept any connectin and start a new routine for IO
 func TCPListen() {
 	game.InitializeFood()
+	game.InitializeMaze()
 	for {
 		conn, err := TCPServer.Accept()
 		if err != nil {
@@ -84,6 +85,7 @@ func handleTCP(conn net.Conn) {
 	user := game.NewUser(conn)
 	logrus.Infof("A new player come in: %s\n", conn.RemoteAddr())
 	user.TCPMQ <- createMsgString("USERINFO", user.ToString())
+	user.TCPMQ <- createMsgString("MAZE", game.Maze.ToString())
 	foodListString := game.Foods.ToStringList()
 	game.DistributeFood(foodListString)
 	game.Users.Mux.Lock()
