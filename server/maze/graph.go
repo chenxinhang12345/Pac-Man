@@ -132,6 +132,7 @@ func (m *Maze) SetUp() {
 	}
 }
 
+// FindCellByCoord is a GET method to get the cell pointer based on coord
 func (m *Maze) FindCellByCoord(row, col int) *Cell {
 	for x, rows := range m.Cells {
 		for y, cell := range rows {
@@ -143,6 +144,7 @@ func (m *Maze) FindCellByCoord(row, col int) *Cell {
 	return nil
 }
 
+// ToBytes is to serialize the struct of maze
 func (m *Maze) ToBytes() []byte {
 	widthPart := MazeWidth / Width
 	heightPart := MazeHeight / Height
@@ -152,6 +154,7 @@ func (m *Maze) ToBytes() []byte {
 		Y0 int
 		Y1 int
 	}
+	// Collect all existed walls in the maze
 	collectRows := make([]coord, 1)
 	collectCols := make([]coord, 1)
 	for row, rows := range m.Cells {
@@ -200,6 +203,7 @@ func (m *Maze) ToBytes() []byte {
 	return bytes
 }
 
+// ToString is to convert the serialized maze to string
 func (m *Maze) ToString() string {
 	return string(m.ToBytes())
 }

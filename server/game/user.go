@@ -38,8 +38,8 @@ func NewUser(conn net.Conn) User {
 	heightPart := MazeHeight / maze.Height
 	user := User{
 		ID:    id,
-		X:     xCell*widthPart + widthPart/4,
-		Y:     yCell*heightPart + heightPart/4,
+		X:     xCell*widthPart + widthPart/3,
+		Y:     yCell*heightPart + heightPart/3,
 		Conn:  conn,
 		Color: -rand.Intn(16777215),
 		TCPMQ: make(chan string, 1024),
