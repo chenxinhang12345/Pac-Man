@@ -29,8 +29,8 @@ const (
 	B          POS = 1
 	L          POS = 2
 	R          POS = 3
-	width      int = 6
-	height     int = 6
+	Width      int = 6
+	Height     int = 6
 	MazeHeight int = 1500
 	MazeWidth  int = 1300
 )
@@ -50,12 +50,12 @@ func NewEdge(cell1, cell2 *Cell, pos POS) Edge {
 
 func NewMaze() *Maze {
 	m := new(Maze)
-	m.Cells = make([][]*Cell, height)
-	for row := 0; row < height; row++ {
-		m.Cells[row] = make([]*Cell, width)
+	m.Cells = make([][]*Cell, Height)
+	for row := 0; row < Height; row++ {
+		m.Cells[row] = make([]*Cell, Width)
 	}
-	for row := 0; row < height; row++ {
-		for col := 0; col < width; col++ {
+	for row := 0; row < Height; row++ {
+		for col := 0; col < Width; col++ {
 			m.AppendCell(NewCell(row, col))
 		}
 	}
@@ -122,8 +122,8 @@ func (m *Maze) FindCellByCoord(row, col int) *Cell {
 }
 
 func (m *Maze) ToBytes() []byte {
-	widthPart := MazeWidth / width
-	heightPart := MazeHeight / height
+	widthPart := MazeWidth / Width
+	heightPart := MazeHeight / Height
 	type coord struct {
 		X0 int
 		X1 int

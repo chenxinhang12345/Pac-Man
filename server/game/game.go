@@ -47,10 +47,14 @@ func handleEAT(eat EatInfo) {
 }
 
 func generateFood() Food {
+	xCell := rand.Intn(maze.Width)
+	yCell := rand.Intn(maze.Height)
+	widthPart := MazeWidth / maze.Width
+	heightPart := MazeHeight / maze.Height
 	food := Food{
 		ID: rand.Intn(200),
-		X:  rand.Intn(MazeWidth),
-		Y:  rand.Intn(MazeHeight),
+		X:  xCell*widthPart + widthPart/2,
+		Y:  yCell*heightPart + heightPart/2,
 	}
 	return food
 }
