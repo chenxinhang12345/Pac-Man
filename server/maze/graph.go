@@ -3,10 +3,12 @@ package maze
 import (
 	"encoding/json"
 	"math/rand"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
+// Cell defines the cell in the maze
 type Cell struct {
 	Top    bool
 	Bottom bool
@@ -16,30 +18,43 @@ type Cell struct {
 	Col    int
 }
 
+// Edge connects two edges, which actually is a wall
 type Edge struct {
 	Cell1 *Cell
 	Cell2 *Cell
 	Pos   POS
 }
 
+// POS defines the position of the wall
 type POS int
 
 const (
-	T          POS = 0
-	B          POS = 1
-	L          POS = 2
-	R          POS = 3
-	Width      int = 6
-	Height     int = 6
+	// T is the top wall
+	T POS = 0
+	// B is the bottom wall
+	B POS = 1
+	// L is the left wall
+	L POS = 2
+	// R is the right wall
+	R POS = 3
+	// Width is the number of cells on the row
+	Width int = 8
+	// Height is the number of cells on the col
+	Height int = 8
+	// MazeHeight is the pixel length of the col
 	MazeHeight int = 1500
-	MazeWidth  int = 1300
+	// MazeWidth is the pixel length of the row
+	MazeWidth int = 1300
 )
 
+// Maze is the main data structure to store the maze
 type Maze struct {
 	Cells [][]*Cell
 	Edges []Edge
 }
 
+// NewCell is to create a new cell in the maze based on given coordinates
+// By default, each wall exists
 func NewCell(row, col int) *Cell {
 	return &Cell{true, true, true, true, row, col}
 }
@@ -82,6 +97,7 @@ func (m *Maze) AddEdge(edge Edge) {
 
 func (m *Maze) SetUp() {
 	cellSet := NewDSet(m.Cells)
+	rand.NewSource(int64(time.Now().Nanosecond()))
 	for cellSet.Size() != 1 {
 		// Remove random edge
 		edgeN := rand.Intn(len(m.Edges))
