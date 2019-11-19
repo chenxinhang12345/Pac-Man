@@ -17,7 +17,6 @@ func decodeTCPMsg(str string) {
 		if err := json.Unmarshal([]byte(tokens[1]), &eatinfo); err != nil {
 			logrus.Error(err)
 		}
-		fmt.Println(eatinfo)
 		handleEAT(eatinfo)
 	}
 }
@@ -97,6 +96,7 @@ func createMsgString(header string, msg string) string {
 	return fmt.Sprintf("%s;%s\n", header, msg)
 }
 
+// InitializeFood is to create 50 foods at the beginning of the game
 func InitializeFood() {
 	Foods.Mux.Lock()
 	for i := 0; i < 50; i++ {
@@ -106,6 +106,7 @@ func InitializeFood() {
 	Foods.Mux.Unlock()
 }
 
+// InitializeMaze is to create the new maze at the beginning of the game.
 func InitializeMaze() {
 	Maze = maze.NewMaze()
 	Maze.SetUp()

@@ -49,8 +49,9 @@ const (
 
 // Maze is the main data structure to store the maze
 type Maze struct {
-	Cells [][]*Cell
-	Edges []Edge
+	Cells   [][]*Cell
+	Edges   []Edge
+	CellSet *DSet
 }
 
 // NewCell is to create a new cell in the maze based on given coordinates
@@ -87,6 +88,7 @@ func NewMaze() *Maze {
 			}
 		}
 	}
+	m.CellSet = NewDSet(m.Cells)
 	return m
 }
 

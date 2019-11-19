@@ -87,8 +87,8 @@ func NewSet(cell *Cell) *Set {
 }
 
 // NewDSet is to create a new set collection
-func NewDSet(cells [][]*Cell) DSet {
-	ds := DSet{}
+func NewDSet(cells [][]*Cell) *DSet {
+	ds := new(DSet)
 	for _, rows := range cells {
 		for _, cell := range rows {
 			ds.Append(NewSet(cell))
