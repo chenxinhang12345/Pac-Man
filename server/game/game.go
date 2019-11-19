@@ -40,7 +40,7 @@ func handleEAT(eat EatInfo) {
 		Foods.Foods[food.ID] = food
 		foodList := Foods.ToStringList()
 		DistributeFood(foodList)
-
+		distributeAddFood(food)
 	}
 	Foods.Mux.Unlock()
 }
