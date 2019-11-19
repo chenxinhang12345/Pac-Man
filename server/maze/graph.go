@@ -1,6 +1,9 @@
 package maze
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Cell struct {
 	Top    bool
@@ -61,6 +64,7 @@ func NewMaze() (m Maze) {
 			}
 		}
 	}
+	fmt.Println(m.Cells)
 	return
 }
 

@@ -48,10 +48,22 @@ func handleEAT(eat EatInfo) {
 func generateFood() Food {
 	food := Food{
 		ID: rand.Intn(200),
-		X:  rand.Intn(500),
-		Y:  rand.Intn(500),
+		X:  rand.Intn(1000),
+		Y:  rand.Intn(1000),
 	}
 	return food
+}
+
+func distributeAddFood(food Food) {
+	bytes, err := json.Marshal(food)
+	if err != nil {
+		logrus.Error(err)
+	}
+	Users.Mux.Lock()
+	for _, user := range Users.Users {
+		user.TCPMQ <- createMsgString("ADDFOOD", string(bytes))
+	}
+	Users.Mux.Unlock()
 }
 
 func DistributeFood(foodList []string) {
@@ -84,7 +96,7 @@ func createMsgString(header string, msg string) string {
 
 func InitializeFood() {
 	Foods.Mux.Lock()
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 50; i++ {
 		food := generateFood()
 		Foods.Foods[food.ID] = food
 	}

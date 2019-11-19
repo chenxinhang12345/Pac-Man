@@ -1,6 +1,7 @@
 package unit_test
 
 import (
+	"Pac-Man/server/maze"
 	"Pac-Man/server/network"
 	"bufio"
 	"fmt"
@@ -71,12 +72,12 @@ func bytes2int(bytes []byte) int {
 	return value
 }
 
-// func TestMaze(t *testing.T) {
-// 	for i:=0; i < 3; i++ {
-// 		t.Run("Test maze construction", func( t *testing.T) {
-// 			// m := maze.NewMaze()
-// 			// m.SetUp()
-
-// 		}
-// 	}
-// }
+func TestMaze(t *testing.T) {
+	for i := 0; i < 3; i++ {
+		t.Run("Test maze construction", func(t *testing.T) {
+			m := maze.NewMaze()
+			// m.SetUp()
+			fmt.Println(m.Cells)
+		})
+	}
+}
