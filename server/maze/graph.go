@@ -59,10 +59,13 @@ func NewCell(row, col int) *Cell {
 	return &Cell{true, true, true, true, row, col}
 }
 
+// NewEdge is to create an edge between two cells
 func NewEdge(cell1, cell2 *Cell, pos POS) Edge {
 	return Edge{cell1, cell2, pos}
 }
 
+// NewMaze is to create a new maze
+// By default, each wall is capsulated
 func NewMaze() *Maze {
 	m := new(Maze)
 	m.Cells = make([][]*Cell, Height)
@@ -87,14 +90,17 @@ func NewMaze() *Maze {
 	return m
 }
 
+// AppendCell is to add a new cell to the maze
 func (m *Maze) AppendCell(cell *Cell) {
 	m.Cells[cell.Row][cell.Col] = cell
 }
 
+// AddEdge is to add a new edge in the maze
 func (m *Maze) AddEdge(edge Edge) {
 	m.Edges = append(m.Edges, edge)
 }
 
+// SetUp is to run randomized Kruskal's algorithm to generate a new maze
 func (m *Maze) SetUp() {
 	cellSet := NewDSet(m.Cells)
 	rand.NewSource(int64(time.Now().Nanosecond()))
