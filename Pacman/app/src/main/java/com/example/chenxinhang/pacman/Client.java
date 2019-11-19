@@ -45,6 +45,7 @@ public class Client {
                     String Bytes;
                     while (true) {
                         if ((Bytes = inFromServer.readLine()) != null) {
+                            System.out.println(Bytes);
                             String[] stringlist = Bytes.split(";", 2);
                             if (stringlist[0].equals("USERINFO")){
                                 receivedBytes = stringlist[1];
@@ -58,6 +59,18 @@ public class Client {
                                 twoPlayerJoined = true;
                             }else if (stringlist[0].equals("FOOD")){
                                 food = stringlist[1];
+//                                String wall = "{\"Rows\":[{\"X1\":0 ,\"X2\":200,\"Y\":800},{\"X1\":200 ,\"X2\":400,\"Y\":800},{\"X1\":0 ,\"X2\":200,\"Y\":1000}]," +
+//                                        "\"Cols\": [{\"Y1\":800 ,\"Y2\":1000,\"X\":0},{\"Y1\":800 ,\"Y2\":1000,\"X\":200}]}";
+
+                            }else if(stringlist[0].equals("SCORE")) {
+                                gamePanel.parseInfoUpdateScore(stringlist[1]);
+                                System.out.println(stringlist[1]);
+                            }else if(stringlist[0].equals("MAZE")){
+                                System.out.println(stringlist[1]);
+                                gamePanel.initializeWalls(stringlist[1]);
+
+                            }else if(stringlist[0].equals("ADDFOOD")){
+                                gamePanel.parseInfoAddNewFood(stringlist[1]);
                             }
                         }
                     }
@@ -84,6 +97,11 @@ public class Client {
         ds.receive(DPreceive);
         String data = new String(DPreceive.getData(), 0, DPreceive.getLength());
         return data;
+    }
+
+    public void sendEatData(int ID , int FoodID) throws IOException{
+       String buffer =  "EAT;{\"ID\":" + ID + ", \"FoodID\":" +FoodID + " }\n";
+       outToServer.writeBytes(buffer);
     }
 
     public static void main(String args[]) throws Exception {

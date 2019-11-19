@@ -16,10 +16,12 @@ public class Player implements GameObject {
     private int oldxPos;
     private int oldyPos;
     private int speed;
+    private int score;
     public GamePanel gamePanel;
 
     public Player( int color,int xPos,int yPos,int width, int height,int speed,int ID, GamePanel gamePanel){
         this.gamePanel = gamePanel;
+        this.score = 0;
         this.color = color;
         this.xPos = xPos;
         this.yPos = yPos;
@@ -67,6 +69,14 @@ public class Player implements GameObject {
         Paint paint = new Paint();
         paint.setColor(color);
         canvas.drawRect(rectangle,paint);
+    }
+
+    public void setScore(int score){
+        this.score = score;
+    }
+
+    public int getScore(){
+        return score;
     }
 
     public void changePosition(int x, int y){
