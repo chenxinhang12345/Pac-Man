@@ -22,6 +22,15 @@ public class Wall implements GameObject {
         this.color = Color.BLACK;
     }
 
+    public Wall(int left, int top, int right, int bottom){
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
+        this.rectangle = new Rect(left,top,right,bottom);
+        this.color=Color.BLACK;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         Paint paint = new Paint();
@@ -31,6 +40,14 @@ public class Wall implements GameObject {
 
     public Rect getLogicRectangle(){
         return new Rect(left,top,right,bottom);
+    }
+
+    public static Wall getRowWall(int x1, int x2, int y, int thickness){
+        return new Wall(x1,y,x2,y+thickness);
+    }
+
+    public static Wall getColWall(int y1, int y2, int x, int thickness){
+        return new Wall(x,y1,x+thickness,y2);
     }
 
 }

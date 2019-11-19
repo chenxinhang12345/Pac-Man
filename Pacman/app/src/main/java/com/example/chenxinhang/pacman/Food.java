@@ -18,7 +18,7 @@ public class Food implements GameObject {
         this.yPos = yPos;
         this.height = 30;
         this.width = 30;
-        this.color = Color.CYAN;
+        this.color = Color.rgb(252, 148, 3);
         this.rectangle = new Rect(xPos-width/2,yPos-height/2,xPos+width/2,yPos+height/2);
     }
     public Rect getRectangle(){
