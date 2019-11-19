@@ -60,17 +60,15 @@ func generateFood() Food {
 }
 
 func distributeAddFood(food Food) {
-	bytes, err := json.Marshal(food)
-	if err != nil {
-		logrus.Error(err)
-	}
 	Users.Mux.Lock()
 	for _, user := range Users.Users {
-		user.TCPMQ <- createMsgString("ADDFOOD", string(bytes))
+		user.TCPMQ <- createMsgString("ADDFOOD", food.ToString())
 	}
 	Users.Mux.Unlock()
 }
 
+// DistributeFood is used at the beginning of the game (required by the Frontend)
+// It will pass the food list to each player
 func DistributeFood(foodList []string) {
 	foodListBytes, err := json.Marshal(foodList)
 	if err != nil {
