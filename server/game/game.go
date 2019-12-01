@@ -35,6 +35,13 @@ func handleAttack(attack AttackInfo) {
 	pacman.Score = 0
 	Users.Users[attack.GhostID] = ghost
 	Users.Users[attack.PacmanID] = pacman
+	xCell := rand.Intn(maze.Width)
+	yCell := rand.Intn(maze.Height)
+	widthPart := MazeWidth / maze.Width
+	heightPart := MazeHeight / maze.Height
+	pacman.X = xCell*widthPart + widthPart/3
+	pacman.Y = yCell*heightPart + heightPart/3
+	pacman.TCPMQ <- createMsgString("POS", pacman.PosToString())
 	var scoreList []string
 	for _, v := range Users.Users {
 		scoreList = append(scoreList, v.GetScoreString())
@@ -46,36 +53,43 @@ func handleAttack(attack AttackInfo) {
 func handleEAT(eat EatInfo) {
 	Foods.Mux.Lock()
 	// When there is no such food, maybe it was eatten concurrently by another player
-	if _, ok := Foods.Foods[eat.FoodID]; ok {
+	if food, ok := Foods.Foods[eat.FoodID]; ok {
+		// Delete original food
 		delete(Foods.Foods, eat.FoodID)
-		Users.Mux.Lock()
-		user := Users.Users[eat.ID]
-		user.Score++
-		Users.Users[eat.ID] = user
-		var scoreList []string
-		for _, v := range Users.Users {
-			scoreList = append(scoreList, v.GetScoreString())
+		if food.Type == "FOOD" {
+			Users.Mux.Lock()
+			user := Users.Users[eat.ID]
+			user.Score++
+			Users.Users[eat.ID] = user
+			var scoreList []string
+			for _, v := range Users.Users {
+				scoreList = append(scoreList, v.GetScoreString())
+			}
+			Users.Mux.Unlock()
+			distributeScore(scoreList)
+			food := generateFood("FOOD")
+			Foods.Foods[food.ID] = food
+			foodList := Foods.ToStringList()
+			DistributeFood(foodList)
+			distributeAddFood(food)
+		} else if food.Type == "INVISIBLE" {
+
 		}
-		Users.Mux.Unlock()
-		distributeScore(scoreList)
-		food := generateFood()
-		Foods.Foods[food.ID] = food
-		foodList := Foods.ToStringList()
-		DistributeFood(foodList)
-		distributeAddFood(food)
+
 	}
 	Foods.Mux.Unlock()
 }
 
-func generateFood() Food {
+func generateFood(Type string) Food {
 	xCell := rand.Intn(maze.Width)
 	yCell := rand.Intn(maze.Height)
 	widthPart := MazeWidth / maze.Width
 	heightPart := MazeHeight / maze.Height
 	food := Food{
-		ID: rand.Intn(200),
-		X:  xCell*widthPart + widthPart/2,
-		Y:  yCell*heightPart + heightPart/2,
+		ID:   rand.Intn(200),
+		X:    xCell*widthPart + widthPart/2,
+		Y:    yCell*heightPart + heightPart/2,
+		Type: Type,
 	}
 	return food
 }
@@ -122,7 +136,7 @@ func createMsgString(header string, msg string) string {
 func InitializeFood() {
 	Foods.Mux.Lock()
 	for i := 0; i < 50; i++ {
-		food := generateFood()
+		food := generateFood("FOOD")
 		Foods.Foods[food.ID] = food
 	}
 	Foods.Mux.Unlock()
