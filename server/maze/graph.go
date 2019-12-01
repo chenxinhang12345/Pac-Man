@@ -38,9 +38,9 @@ const (
 	// R is the right wall
 	R POS = 3
 	// Width is the number of cells on the row
-	Width int = 8
+	Width int = 40
 	// Height is the number of cells on the col
-	Height int = 8
+	Height int = 40
 	// MazeHeight is the pixel length of the col
 	MazeHeight int = 1500
 	// MazeWidth is the pixel length of the row

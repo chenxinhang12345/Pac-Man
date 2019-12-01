@@ -18,8 +18,21 @@ func decodeTCPMsg(str string) {
 			logrus.Error(err)
 		}
 		handleEAT(eatinfo)
+	} else if tokens[0] == "ATTACK" {
+		var attackInfo AttackInfo
+		if err := json.Unmarshal([]byte(tokens[1]), &attackInfo); err != nil {
+			logrus.Error(err)
+		}
+		// handleAttack(attackInfo)
 	}
 }
+
+// func handleAttack(attack AttackInfo) {
+// 	Users.Mux.Lock()
+// 	Users.Users[attack.GhostID].Score += Users.Users[attack.PacmanID].Score
+// 	Users.Users[attack.PacmanID].Score = 0
+// 	Users.Mux.Unlock()
+// }
 
 func handleEAT(eat EatInfo) {
 	Foods.Mux.Lock()
@@ -109,5 +122,7 @@ func InitializeFood() {
 // InitializeMaze is to create the new maze at the beginning of the game.
 func InitializeMaze() {
 	Maze = maze.NewMaze()
+	fmt.Println("New maze")
 	Maze.SetUp()
+	fmt.Println("Maze setup")
 }

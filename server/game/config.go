@@ -68,6 +68,12 @@ type Score struct {
 	Score int
 }
 
+// AttackInfo is the data scheme from the player
+type AttackInfo struct {
+	GhostID  int
+	PacmanID int
+}
+
 // ToBytes is to create serialized food data
 func (food Food) ToBytes() []byte {
 	foodMarshal, err := json.Marshal(food)
