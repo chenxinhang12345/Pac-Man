@@ -27,9 +27,10 @@ var Users = UsersLookUP{
 
 // MoveInfo is the data scheme from the player
 type MoveInfo struct {
-	ID int
-	X  int
-	Y  int
+	ID      int
+	X       int
+	Y       int
+	Visible bool
 }
 
 // MovePacket stores move data and destination
@@ -40,9 +41,10 @@ type MovePacket struct {
 
 // Food stores the food info
 type Food struct {
-	ID int
-	X  int
-	Y  int
+	ID   int
+	X    int
+	Y    int
+	Type string
 }
 
 // FoodsLookUP stores the food info
