@@ -19,6 +19,7 @@ type User struct {
 	Y     int
 	Color int
 	Score int
+	Type  string
 	Conn  net.Conn
 	TCPMQ chan string
 }
@@ -40,9 +41,13 @@ func NewUser(conn net.Conn) User {
 		ID:    id,
 		X:     xCell*widthPart + widthPart/3,
 		Y:     yCell*heightPart + heightPart/3,
+		Type:  "PACMAN",
 		Conn:  conn,
 		Color: -rand.Intn(16777215),
 		TCPMQ: make(chan string, 1024),
+	}
+	if len(Users.Users) != 0 && len(Users.Users)%2 == 0 {
+		user.Type = "GHOST"
 	}
 	Users.Users[id] = user
 	Users.Mux.Unlock()
@@ -92,12 +97,14 @@ func (user User) ToBytes() []byte {
 		X     int
 		Y     int
 		Score int
+		Type  string
 	}{
 		ID:    user.ID,
 		Color: user.Color,
 		X:     user.X,
 		Y:     user.Y,
 		Score: user.Score,
+		Type:  user.Type,
 	}
 	userMarshal, err := json.Marshal(info)
 	if err != nil {

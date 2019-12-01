@@ -38,9 +38,9 @@ const (
 	// R is the right wall
 	R POS = 3
 	// Width is the number of cells on the row
-	Width int = 8
+	Width int = 40
 	// Height is the number of cells on the col
-	Height int = 8
+	Height int = 40
 	// MazeHeight is the pixel length of the col
 	MazeHeight int = 1500
 	// MazeWidth is the pixel length of the row
@@ -49,8 +49,9 @@ const (
 
 // Maze is the main data structure to store the maze
 type Maze struct {
-	Cells [][]*Cell
-	Edges []Edge
+	Cells   [][]*Cell
+	Edges   []Edge
+	CellSet *DSet
 }
 
 // NewCell is to create a new cell in the maze based on given coordinates
@@ -87,6 +88,7 @@ func NewMaze() *Maze {
 			}
 		}
 	}
+	m.CellSet = NewDSet(m.Cells)
 	return m
 }
 

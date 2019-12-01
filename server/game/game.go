@@ -17,10 +17,22 @@ func decodeTCPMsg(str string) {
 		if err := json.Unmarshal([]byte(tokens[1]), &eatinfo); err != nil {
 			logrus.Error(err)
 		}
-		fmt.Println(eatinfo)
 		handleEAT(eatinfo)
+	} else if tokens[0] == "ATTACK" {
+		var attackInfo AttackInfo
+		if err := json.Unmarshal([]byte(tokens[1]), &attackInfo); err != nil {
+			logrus.Error(err)
+		}
+		// handleAttack(attackInfo)
 	}
 }
+
+// func handleAttack(attack AttackInfo) {
+// 	Users.Mux.Lock()
+// 	Users.Users[attack.GhostID].Score += Users.Users[attack.PacmanID].Score
+// 	Users.Users[attack.PacmanID].Score = 0
+// 	Users.Mux.Unlock()
+// }
 
 func handleEAT(eat EatInfo) {
 	Foods.Mux.Lock()
@@ -60,17 +72,15 @@ func generateFood() Food {
 }
 
 func distributeAddFood(food Food) {
-	bytes, err := json.Marshal(food)
-	if err != nil {
-		logrus.Error(err)
-	}
 	Users.Mux.Lock()
 	for _, user := range Users.Users {
-		user.TCPMQ <- createMsgString("ADDFOOD", string(bytes))
+		user.TCPMQ <- createMsgString("ADDFOOD", food.ToString())
 	}
 	Users.Mux.Unlock()
 }
 
+// DistributeFood is used at the beginning of the game (required by the Frontend)
+// It will pass the food list to each player
 func DistributeFood(foodList []string) {
 	foodListBytes, err := json.Marshal(foodList)
 	if err != nil {
@@ -99,6 +109,7 @@ func createMsgString(header string, msg string) string {
 	return fmt.Sprintf("%s;%s\n", header, msg)
 }
 
+// InitializeFood is to create 50 foods at the beginning of the game
 func InitializeFood() {
 	Foods.Mux.Lock()
 	for i := 0; i < 50; i++ {
@@ -108,7 +119,10 @@ func InitializeFood() {
 	Foods.Mux.Unlock()
 }
 
+// InitializeMaze is to create the new maze at the beginning of the game.
 func InitializeMaze() {
 	Maze = maze.NewMaze()
+	fmt.Println("New maze")
 	Maze.SetUp()
+	fmt.Println("Maze setup")
 }

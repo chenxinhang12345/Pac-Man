@@ -25,10 +25,6 @@ func TestServer(t *testing.T) {
 			for {
 				str, err := reader.ReadString('\n')
 				if err != nil {
-					// if err == io.EOF {
-					// conn.Close()
-					// return
-					// }
 					logrus.Error(err)
 				}
 				tokens := strings.Split(str, ";")
@@ -38,24 +34,6 @@ func TestServer(t *testing.T) {
 					fmt.Printf("NEWUSER: %s", tokens[1])
 				}
 			}
-
-			// if str != "USERINFO\n" {
-			// 	logrus.Errorf("Wrong response: %s", str)
-			// }
-			// size := make([]byte, 8)
-			// n, err := reader.Read(size)
-			// if err != nil || n != 8 {
-			// 	logrus.Errorf("Error when read data size: %s  readed bytes: %d", err, n)
-			// }
-			// length := int(binary.BigEndian.Uint64(size))
-			// fmt.Println(length)
-			// data := make([]byte, length)
-			// n, err = reader.Read(data)
-			// if err != nil || n != length {
-			// 	logrus.Errorf("Error when read data: %s  read length: %d", err, n)
-			// }
-			// fmt.Println(string(data))
-
 		})
 	}
 	select {}
@@ -75,5 +53,26 @@ func bytes2int(bytes []byte) int {
 func TestMaze(t *testing.T) {
 	m := maze.NewMaze()
 	m.SetUp()
-	m.ToBytes()
+	for _, rows := range m.Cells {
+		for _, cell := range rows {
+			fmt.Printf("%+v\n", cell)
+		}
+	}
+}
+
+func TestDSet(t *testing.T) {
+	m := maze.NewMaze()
+	cell1 := m.FindCellByCoord(0, 0)
+	cell2 := m.FindCellByCoord(0, 1)
+	p1 := m.CellSet.Find(cell1)
+	p2 := m.CellSet.Find(cell2)
+	// Test disjoint set setup
+	if m.CellSet.Size() != 64 {
+		t.Error("There is no set up disjoint set")
+	}
+	// Test disjoint set union
+	p1.Union(*p2)
+	if m.CellSet.Size() != 63 {
+		t.Error("There is no union operation")
+	}
 }
