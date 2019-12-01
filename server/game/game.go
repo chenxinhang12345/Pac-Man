@@ -41,7 +41,6 @@ func handleAttack(attack AttackInfo) {
 	}
 	Users.Mux.Unlock()
 	distributeScore(scoreList)
-
 }
 
 func handleEAT(eat EatInfo) {
