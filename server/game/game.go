@@ -23,16 +23,26 @@ func decodeTCPMsg(str string) {
 		if err := json.Unmarshal([]byte(tokens[1]), &attackInfo); err != nil {
 			logrus.Error(err)
 		}
-		// handleAttack(attackInfo)
+		handleAttack(attackInfo)
 	}
 }
 
-// func handleAttack(attack AttackInfo) {
-// 	Users.Mux.Lock()
-// 	Users.Users[attack.GhostID].Score += Users.Users[attack.PacmanID].Score
-// 	Users.Users[attack.PacmanID].Score = 0
-// 	Users.Mux.Unlock()
-// }
+func handleAttack(attack AttackInfo) {
+	Users.Mux.Lock()
+	ghost := Users.Users[attack.GhostID]
+	pacman := Users.Users[attack.PacmanID]
+	ghost.Score += pacman.Score
+	pacman.Score = 0
+	Users.Users[attack.GhostID] = ghost
+	Users.Users[attack.PacmanID] = pacman
+	var scoreList []string
+	for _, v := range Users.Users {
+		scoreList = append(scoreList, v.GetScoreString())
+	}
+	Users.Mux.Unlock()
+	distributeScore(scoreList)
+
+}
 
 func handleEAT(eat EatInfo) {
 	Foods.Mux.Lock()
