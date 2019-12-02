@@ -165,6 +165,6 @@ func (user *User) HandleInvisibleTimer() {
 	for {
 		<-user.InvisibleTimer.C
 		user.Visible = true
+		logrus.Infof("User %d invisible duration expires", user.ID)
 	}
-
 }
