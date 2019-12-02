@@ -42,11 +42,13 @@ public class Wall implements GameObject {
         return new Rect(left,top,right,bottom);
     }
 
-    public static Wall getRowWall(int x1, int x2, int y, int thickness){
+    public static Wall getRowWall(int x1, int x2, int y){
+        int thickness = 10;
         return new Wall(x1,y,x2,y+thickness);
     }
 
-    public static Wall getColWall(int y1, int y2, int x, int thickness){
+    public static Wall getColWall(int y1, int y2, int x){
+        int thickness = 10;
         return new Wall(x,y1,x+thickness,y2);
     }
 

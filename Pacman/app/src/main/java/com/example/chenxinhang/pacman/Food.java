@@ -12,12 +12,14 @@ public class Food implements GameObject {
     private int height;
     private int width;
     private int color;
+    private String type;
 
-    public Food(int xPos, int yPos){
+    public Food(int xPos, int yPos, String type ){
         this.xPos = xPos;
         this.yPos = yPos;
-        this.height = 30;
-        this.width = 30;
+        this.height = 10;
+        this.width = 10;
+        this.type = type;
         this.color = Color.rgb(252, 148, 3);
         this.rectangle = new Rect(xPos-width/2,yPos-height/2,xPos+width/2,yPos+height/2);
     }

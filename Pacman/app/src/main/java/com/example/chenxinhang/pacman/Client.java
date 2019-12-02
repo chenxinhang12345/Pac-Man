@@ -71,6 +71,9 @@ public class Client {
 
                             }else if(stringlist[0].equals("ADDFOOD")){
                                 gamePanel.parseInfoAddNewFood(stringlist[1]);
+                            }else if (stringlist[0].equals("POS")){
+                                System.out.println("respawn");
+                                gamePanel.parseInfoRespawn(stringlist[1]);
                             }
                         }
                     }
@@ -102,6 +105,11 @@ public class Client {
     public void sendEatData(int ID , int FoodID) throws IOException{
        String buffer =  "EAT;{\"ID\":" + ID + ", \"FoodID\":" +FoodID + " }\n";
        outToServer.writeBytes(buffer);
+    }
+
+    public void sendAttackData(int ghostID, int pacmanID) throws  IOException {
+        String buffer = "ATTACK;{\"GhostID:\":"+ghostID+",\"PacmanID\":"+pacmanID+" }\n";
+        outToServer.writeBytes(buffer);
     }
 
     public static void main(String args[]) throws Exception {

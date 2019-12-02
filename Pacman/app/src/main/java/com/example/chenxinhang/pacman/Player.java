@@ -1,8 +1,12 @@
 package com.example.chenxinhang.pacman;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.Point;
 
@@ -17,9 +21,14 @@ public class Player implements GameObject {
     private int oldyPos;
     private int speed;
     private int score;
+    private Bitmap pacmanTexture;
+    private Paint paint;
+    private int width;
+    private int height;
+    private String type;
     public GamePanel gamePanel;
 
-    public Player( int color,int xPos,int yPos,int width, int height,int speed,int ID, GamePanel gamePanel){
+    public Player( int color,int xPos,int yPos,int width, int height,int speed,int ID,String type, GamePanel gamePanel){
         this.gamePanel = gamePanel;
         this.score = 0;
         this.color = color;
@@ -27,9 +36,15 @@ public class Player implements GameObject {
         this.yPos = yPos;
         this.oldxPos = xPos;
         this.oldyPos = yPos;
-        this.rectangle = new Rect(xPos-width/2,yPos-height/2,xPos+width/2,yPos+height/2);
+        this.type = type;
+        this.width = 20;
+        this.height = 20;
+        this.rectangle = new Rect(xPos-this.width/2,yPos-this.height/2,xPos+this.width/2,yPos+this.height/2);
         this.speed = speed;
         this.ID = ID;
+//        this.pacmanTexture = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gamePanel.getResources(), R.drawable.pacman),(int)(1.5*width),(int)(1.5*height),false);
+        this.paint = new Paint();
+        paint.setColor(color);
     }
 
     public int getxPos() {
@@ -43,6 +58,10 @@ public class Player implements GameObject {
     public void setxPos(int xPos){ this.xPos = xPos; }
 
     public void setyPos(int yPos){this.yPos = yPos;}
+
+    public String getType(){
+        return type;
+    }
 
     public void setColor(int color){
         this.color = color;
@@ -66,9 +85,16 @@ public class Player implements GameObject {
 
     @Override
     public void draw(Canvas canvas) {
-        Paint paint = new Paint();
+//        Paint paint = new Paint();
         paint.setColor(color);
-        canvas.drawRect(rectangle,paint);
+        if(this.type.equals("PACMAN")){
+            canvas.drawRect(rectangle,paint);
+        }else{
+            canvas.drawCircle(xPos,yPos,10,paint);
+        }
+
+
+//        canvas.drawBitmap(pacmanTexture, xPos-width, yPos-height, paint);
     }
 
     public void setScore(int score){
@@ -80,6 +106,8 @@ public class Player implements GameObject {
     }
 
     public void changePosition(int x, int y){
+        xPos = x;
+        yPos = y;
         rectangle.set(x-rectangle.width()/2,y-rectangle.height()/2,x+rectangle.width()/2,y+rectangle.height()/2);
     }
 
