@@ -99,6 +99,7 @@ func handleTCP(conn net.Conn) {
 	game.Users.Mux.Unlock()
 	go user.HandleRead()
 	go user.HandleWrite()
+	go user.HandleInvisibleTimer()
 }
 
 // creteMsgString will construct a msg with the header and msg
