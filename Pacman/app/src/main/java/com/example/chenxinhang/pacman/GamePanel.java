@@ -374,14 +374,14 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void obstacle() {
         food.entrySet().removeIf(e -> (isEat(player1, e, true)));
         food.entrySet().removeIf(e -> (isEat(player2, e, false)));
-//        if(player1.getType().equals("GHOST")) {
-//            isEatPlayer(player1, player2);
-//            if(players.size()>0) {
-//                for (Player mulPlayer : players.values()) {
-//                    isEatPlayer(player1, mulPlayer);
-//                }
-//            }
-//        }
+        if(player1.getType().equals("GHOST")) {
+            isEatPlayer(player1, player2);
+            if(players.size()>0) {
+                for (Player mulPlayer : players.values()) {
+                    isEatPlayer(player1, mulPlayer);
+                }
+            }
+        }
         if (players.size() > 0) {
             for (Player mulPlayer : players.values()) {
                 food.entrySet().removeIf(e -> (isEat(mulPlayer, e, false)));
