@@ -20,11 +20,22 @@ public class Food implements GameObject {
         this.height = 10;
         this.width = 10;
         this.type = type;
-        this.color = Color.rgb(252, 148, 3);
+        if(type.equals("NORMAL")) {
+            this.color = Color.rgb(252, 148, 3);
+        }else if(type.equals("INVISIBLE")){
+            this.color = Color.BLUE;
+        }
         this.rectangle = new Rect(xPos-width/2,yPos-height/2,xPos+width/2,yPos+height/2);
     }
     public Rect getRectangle(){
         return this.rectangle;
+    }
+
+    public Rect getLogicRectangle(){
+        return new Rect(rectangle.left,rectangle.top,rectangle.right,rectangle.bottom);
+    }
+    public String getType(){
+        return type;
     }
     @Override
     public void draw(Canvas canvas){

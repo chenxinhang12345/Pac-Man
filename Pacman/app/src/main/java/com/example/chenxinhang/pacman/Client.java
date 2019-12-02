@@ -74,6 +74,10 @@ public class Client {
                             }else if (stringlist[0].equals("POS")){
                                 System.out.println("respawn");
                                 gamePanel.parseInfoRespawn(stringlist[1]);
+                            }else if(stringlist[0].equals("VISIBLE")){
+                                gamePanel.visiblePlayer();
+                            }else if(stringlist[0].equals("END")){
+                                gamePanel.endGameParseScore(stringlist[1]);
                             }
                         }
                     }
@@ -89,8 +93,8 @@ public class Client {
 
     }
 
-    public void send(int xPos, int yPos, int ID) throws IOException {
-        buf = ("POS;{\"ID\":" + ID + ", \"X\":" + xPos + ", \"Y\": " + yPos + " }\n").getBytes();
+    public void send(int xPos, int yPos, int ID,boolean visible) throws IOException {
+        buf = ("POS;{\"ID\":" + ID + ", \"X\":" + xPos + ", \"Y\": " + yPos + ",\"Visible\":"+ visible+"}\n").getBytes();
         DatagramPacket DPsend = new DatagramPacket(buf, buf.length, ip, UDP_SERVER_PORT);
         ds.send(DPsend);
     }
@@ -108,8 +112,7 @@ public class Client {
     }
 
     public void sendAttackData(int ghostID, int pacmanID) throws  IOException {
-        String buffer = "ATTACK;{\"GhostID:\":"+ghostID+",\"PacmanID\":"+pacmanID+" }\n";
-        System.out.println("send respawn data");
+        String buffer = "ATTACK;{\"GhostID\":"+ghostID+",\"PacmanID\":"+pacmanID+" }\n";
         outToServer.writeBytes(buffer);
     }
 

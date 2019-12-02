@@ -26,6 +26,7 @@ public class Player implements GameObject {
     private int width;
     private int height;
     private String type;
+    private boolean visible;
     public GamePanel gamePanel;
 
     public Player( int color,int xPos,int yPos,int width, int height,int speed,int ID,String type, GamePanel gamePanel){
@@ -39,6 +40,7 @@ public class Player implements GameObject {
         this.type = type;
         this.width = 20;
         this.height = 20;
+        this.visible = true;
         this.rectangle = new Rect(xPos-this.width/2,yPos-this.height/2,xPos+this.width/2,yPos+this.height/2);
         this.speed = speed;
         this.ID = ID;
@@ -90,17 +92,59 @@ public class Player implements GameObject {
     @Override
     public void draw(Canvas canvas) {
 //        Paint paint = new Paint();
-        paint.setColor(color);
-        if(this.type.equals("PACMAN")){
-            canvas.drawRect(rectangle,paint);
-        }else{
-            int x = (rectangle.left+rectangle.right)/2;
-            int y = (rectangle.top+rectangle.bottom)/2;
-            canvas.drawCircle(x,y,rectangle.width()-5,paint);
-        }
 
+
+            if(!visible){
+                if(ID==gamePanel.player1.getID()) {
+                    paint.setColor(Color.WHITE);
+                }else{
+                    paint.setColor(Color.argb(0,255,255,255));
+                }
+            }else {
+                paint.setColor(color);
+            }
+            if (this.type.equals("PACMAN")) {
+                canvas.drawRect(rectangle, paint);
+            } else {
+                int x = (rectangle.left + rectangle.right) / 2;
+                int y = (rectangle.top + rectangle.bottom) / 2;
+                canvas.drawCircle(x, y, rectangle.width() - 5, paint);
+            }
 
 //        canvas.drawBitmap(pacmanTexture, xPos-width, yPos-height, paint);
+    }
+
+    public void drawScore(Canvas canvas){
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(10);
+        canvas.drawText("score: "+score,xPos,yPos,paint);
+    }
+    public void drawEndInfo(Canvas canvas){
+        paint.setColor(Color.argb(90,255, 111, 0));
+        paint.setTextSize(15);
+        String message = "Your team Win!";
+        if(gamePanel.getGhostScore()>gamePanel.getPacmanScore()){
+            if(gamePanel.player1.getType().equals("PACMAN")) {
+                message = "Your team Lose!";
+            }
+        }else if(gamePanel.getGhostScore()<gamePanel.getPacmanScore()) {
+            if(gamePanel.player1.getType().equals("Ghost")) {
+                message = "Your team Lose!";
+            }
+        }else{
+            message = "Draw!";
+        }
+        canvas.drawText(message,xPos,yPos+300,paint);
+        canvas.drawText("Ghost score: "+gamePanel.getGhostScore()+" Pacman score: "+gamePanel.getPacmanScore(),xPos,yPos+100,paint);
+    }
+
+
+    public void setVisible(boolean visible){
+        this.visible = visible;
+    }
+
+    public boolean getVisible(){
+        return visible;
     }
 
     public void setScore(int score){
