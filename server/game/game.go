@@ -31,6 +31,9 @@ func decodeTCPMsg(str string) {
 func handleAttack(attack AttackInfo) {
 	logrus.Infof("Player %d was attacked", attack.PacmanID)
 	Users.Mux.Lock()
+	fmt.Printf("%+v\n", attack)
+	fmt.Printf("%+v\n", Users.Users)
+
 	ghost := Users.Users[attack.GhostID]
 	pacman := Users.Users[attack.PacmanID]
 	ghost.Score += pacman.Score
@@ -82,7 +85,7 @@ func handleEAT(eat EatInfo) {
 			user := Users.Users[eat.ID]
 			user.Visible = false
 			user.InvisibleTimer.Stop()
-			user.InvisibleTimer.Reset(3 * time.Second)
+			user.InvisibleTimer.Reset(InvisibleTime * time.Second)
 			Users.Mux.Unlock()
 			food := generateFood("INVISIBLE")
 			Foods.AddFood(food)
@@ -154,7 +157,7 @@ func InitializeFood() {
 		food := generateFood("NORMAL")
 		Foods.Foods[food.ID] = food
 	}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 10; i++ {
 		food := generateFood("INVISIBLE")
 		Foods.Foods[food.ID] = food
 	}
@@ -166,4 +169,41 @@ func InitializeFood() {
 func InitializeMaze() {
 	Maze = maze.NewMaze()
 	Maze.SetUp()
+	logrus.Infoln("Successfully initialized maze.")
+}
+
+// HandleGameTime will count the global time
+func HandleGameTime() {
+	for {
+		<-GlobalTimer.C
+		result := calculateResultScore()
+		bytes, err := json.Marshal(result)
+		if err != nil {
+			panic(err)
+		}
+		Users.Mux.Lock()
+		for _, user := range Users.Users {
+			user.TCPMQ <- createMsgString("END", string(bytes))
+		}
+		Users.Mux.Unlock()
+		logrus.Infof("Come to the end of the game: Pacman: %d, Ghost: %d", result.Pacman, result.Ghost)
+	}
+}
+
+func calculateResultScore() Result {
+	Users.Mux.RLock()
+	pacmanScore := 0
+	ghostScore := 0
+	for _, user := range Users.Users {
+		if user.Type == "PACMAN" {
+			pacmanScore += user.Score
+		} else if user.Type == "GHOST" {
+			ghostScore += user.Score
+		}
+	}
+	Users.Mux.RUnlock()
+	return Result{
+		Pacman: pacmanScore,
+		Ghost:  ghostScore,
+	}
 }

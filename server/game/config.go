@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net"
 	"sync"
+	"time"
 )
 
 const (
@@ -12,6 +13,10 @@ const (
 	MazeHeight int = 1500
 	// MazeWidth is the pixel length of the row
 	MazeWidth int = 1300
+	// InvisibleTime is the duration player invisible
+	InvisibleTime time.Duration = 3
+	// GameTime is the time duration for each game
+	GameTime time.Duration = 1
 )
 
 // UsersLookUP stores all users infomaion
@@ -76,6 +81,12 @@ type AttackInfo struct {
 	PacmanID int
 }
 
+// Result is to send the result of the game
+type Result struct {
+	Pacman int
+	Ghost  int
+}
+
 // ToBytes is to create serialized food data
 func (food Food) ToBytes() []byte {
 	foodMarshal, err := json.Marshal(food)
@@ -101,6 +112,7 @@ func (foodsTable *FoodsLookUP) ToStringList() []string {
 	return foodList
 }
 
+// AddFood is to add a new food to the exisiting list
 func (foodsTable *FoodsLookUP) AddFood(food Food) {
 	foodsTable.Mux.Lock()
 	Foods.Foods[food.ID] = food
@@ -109,3 +121,6 @@ func (foodsTable *FoodsLookUP) AddFood(food Food) {
 
 // Maze is the main data structure to the walls
 var Maze *maze.Maze
+
+// GlobalTimer is to count the time of a game
+var GlobalTimer *time.Timer
