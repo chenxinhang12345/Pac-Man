@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -100,6 +101,19 @@ func handleTCP(conn net.Conn) {
 	go user.HandleRead()
 	go user.HandleWrite()
 	go user.HandleInvisibleTimer()
+	// The global counter will work when there are at least two players
+	if len(game.Users.Users) == 1 {
+		return
+	}
+	// When comming in a new user, reset the counter
+	if game.GlobalTimer == nil {
+		game.GlobalTimer = time.NewTimer(game.GameTime * time.Minute)
+		go game.HandleGameTime()
+		logrus.Infoln("Game start.")
+	} else {
+		game.GlobalTimer.Reset(game.GameTime * time.Minute)
+		logrus.Infoln("Game counter reset.")
+	}
 }
 
 // creteMsgString will construct a msg with the header and msg
