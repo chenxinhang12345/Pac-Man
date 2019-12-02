@@ -165,6 +165,7 @@ func (user *User) HandleInvisibleTimer() {
 	for {
 		<-user.InvisibleTimer.C
 		user.Visible = true
+		user.TCPMQ <- createMsgString("POS", user.PosToString())
 		logrus.Infof("User %d invisible duration expires", user.ID)
 	}
 }
