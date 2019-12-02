@@ -14,18 +14,21 @@ import (
 
 // User is to store all information about a player
 type User struct {
-	ID    int
-	X     int
-	Y     int
-	Color int
-	Score int
-	Conn  net.Conn
-	TCPMQ chan string
+	ID             int
+	X              int
+	Y              int
+	Color          int
+	Score          int
+	Type           string
+	Visible        bool
+	Conn           net.Conn
+	TCPMQ          chan string
+	InvisibleTimer *time.Timer
 }
 
 // NewUser will create a new user according to the connection
 // User will keep alive the connection
-func NewUser(conn net.Conn) User {
+func NewUser(conn net.Conn) *User {
 	rand.Seed(int64(time.Now().Nanosecond()))
 	id := rand.Intn(1000)
 	Users.Mux.Lock()
@@ -36,13 +39,22 @@ func NewUser(conn net.Conn) User {
 	yCell := rand.Intn(maze.Height)
 	widthPart := MazeWidth / maze.Width
 	heightPart := MazeHeight / maze.Height
-	user := User{
-		ID:    id,
-		X:     xCell*widthPart + widthPart/3,
-		Y:     yCell*heightPart + heightPart/3,
-		Conn:  conn,
-		Color: -rand.Intn(16777215),
-		TCPMQ: make(chan string, 1024),
+	user := &User{
+		ID:      id,
+		X:       xCell*widthPart + widthPart/3,
+		Y:       yCell*heightPart + heightPart/3,
+		Type:    "PACMAN",
+		Visible: true,
+		Conn:    conn,
+		Color:   -rand.Intn(16777215),
+		TCPMQ:   make(chan string, 1024),
+	}
+	// if len(Users.Users) != 0 && len(Users.Users)%2 == 0 {
+	// 	user.Type = "GHOST"
+	// }
+	// TEST CODE
+	if len(Users.Users) == 1 {
+		user.Type = "GHOST"
 	}
 	Users.Users[id] = user
 	Users.Mux.Unlock()
@@ -92,12 +104,14 @@ func (user User) ToBytes() []byte {
 		X     int
 		Y     int
 		Score int
+		Type  string
 	}{
 		ID:    user.ID,
 		Color: user.Color,
 		X:     user.X,
 		Y:     user.Y,
 		Score: user.Score,
+		Type:  user.Type,
 	}
 	userMarshal, err := json.Marshal(info)
 	if err != nil {
@@ -122,4 +136,31 @@ func (user User) GetScoreBytes() []byte {
 // GetScoreString is to format user score data to string
 func (user User) GetScoreString() string {
 	return string(user.GetScoreBytes())
+}
+
+// PosToBytes is to format user position data to bytes
+func (user User) PosToBytes() []byte {
+	moveInfo := MoveInfo{
+		ID:      user.ID,
+		X:       user.X,
+		Y:       user.Y,
+		Visible: user.Visible,
+	}
+	bytes, err := json.Marshal(moveInfo)
+	if err != nil {
+		panic(err)
+	}
+	return bytes
+}
+
+// PosToString is to format user position data to string
+func (user User) PosToString() string {
+	return string(user.PosToBytes())
+}
+
+// HandleInvisibleTimer will check the timer.
+// When the invisible duration expires, the user will become visible
+func (user *User) HandleInvisibleTimer() {
+	<-user.InvisibleTimer.C
+	user.Visible = true
 }

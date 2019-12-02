@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -17,60 +18,103 @@ func decodeTCPMsg(str string) {
 		if err := json.Unmarshal([]byte(tokens[1]), &eatinfo); err != nil {
 			logrus.Error(err)
 		}
-		fmt.Println(eatinfo)
 		handleEAT(eatinfo)
+	} else if tokens[0] == "ATTACK" {
+		var attackInfo AttackInfo
+		if err := json.Unmarshal([]byte(tokens[1]), &attackInfo); err != nil {
+			logrus.Error(err)
+		}
+		handleAttack(attackInfo)
 	}
+}
+
+func handleAttack(attack AttackInfo) {
+	Users.Mux.Lock()
+	ghost := Users.Users[attack.GhostID]
+	pacman := Users.Users[attack.PacmanID]
+	ghost.Score += pacman.Score
+	pacman.Score = 0
+	Users.Users[attack.GhostID] = ghost
+	Users.Users[attack.PacmanID] = pacman
+	xCell := rand.Intn(maze.Width)
+	yCell := rand.Intn(maze.Height)
+	widthPart := MazeWidth / maze.Width
+	heightPart := MazeHeight / maze.Height
+	pacman.X = xCell*widthPart + widthPart/3
+	pacman.Y = yCell*heightPart + heightPart/3
+	pacman.TCPMQ <- createMsgString("POS", pacman.PosToString())
+	var scoreList []string
+	for _, v := range Users.Users {
+		scoreList = append(scoreList, v.GetScoreString())
+	}
+	Users.Mux.Unlock()
+	distributeScore(scoreList)
 }
 
 func handleEAT(eat EatInfo) {
 	Foods.Mux.Lock()
 	// When there is no such food, maybe it was eatten concurrently by another player
-	if _, ok := Foods.Foods[eat.FoodID]; ok {
+	if food, ok := Foods.Foods[eat.FoodID]; ok {
+		// Delete original food
 		delete(Foods.Foods, eat.FoodID)
-		Users.Mux.Lock()
-		user := Users.Users[eat.ID]
-		user.Score++
-		Users.Users[eat.ID] = user
-		var scoreList []string
-		for _, v := range Users.Users {
-			scoreList = append(scoreList, v.GetScoreString())
+		Foods.Mux.Unlock()
+		if food.Type == "NORMAL" {
+			Users.Mux.Lock()
+			user := Users.Users[eat.ID]
+			user.Score++
+			Users.Users[eat.ID] = user
+			var scoreList []string
+			for _, v := range Users.Users {
+				scoreList = append(scoreList, v.GetScoreString())
+			}
+			Users.Mux.Unlock()
+			distributeScore(scoreList)
+			food := generateFood("NORMAL")
+			Foods.AddFood(food)
+			foodList := Foods.ToStringList()
+			DistributeFood(foodList)
+			distributeAddFood(food)
+		} else if food.Type == "INVISIBLE" {
+			Users.Mux.Lock()
+			user := Users.Users[eat.ID]
+			user.Visible = false
+			user.InvisibleTimer = time.NewTimer(time.Second * 5)
+			Users.Mux.Unlock()
+			food := generateFood("INVISIBLE")
+			Foods.AddFood(food)
+			foodList := Foods.ToStringList()
+			DistributeFood(foodList)
+			distributeAddFood(food)
 		}
-		Users.Mux.Unlock()
-		distributeScore(scoreList)
-		food := generateFood()
-		Foods.Foods[food.ID] = food
-		foodList := Foods.ToStringList()
-		DistributeFood(foodList)
-		distributeAddFood(food)
+	} else {
+		Foods.Mux.Unlock()
 	}
-	Foods.Mux.Unlock()
 }
 
-func generateFood() Food {
+func generateFood(Type string) Food {
 	xCell := rand.Intn(maze.Width)
 	yCell := rand.Intn(maze.Height)
 	widthPart := MazeWidth / maze.Width
 	heightPart := MazeHeight / maze.Height
 	food := Food{
-		ID: rand.Intn(200),
-		X:  xCell*widthPart + widthPart/2,
-		Y:  yCell*heightPart + heightPart/2,
+		ID:   rand.Intn(200),
+		X:    xCell*widthPart + widthPart/2,
+		Y:    yCell*heightPart + heightPart/2,
+		Type: Type,
 	}
 	return food
 }
 
 func distributeAddFood(food Food) {
-	bytes, err := json.Marshal(food)
-	if err != nil {
-		logrus.Error(err)
-	}
 	Users.Mux.Lock()
 	for _, user := range Users.Users {
-		user.TCPMQ <- createMsgString("ADDFOOD", string(bytes))
+		user.TCPMQ <- createMsgString("ADDFOOD", food.ToString())
 	}
 	Users.Mux.Unlock()
 }
 
+// DistributeFood is used at the beginning of the game (required by the Frontend)
+// It will pass the food list to each player
 func DistributeFood(foodList []string) {
 	foodListBytes, err := json.Marshal(foodList)
 	if err != nil {
@@ -99,15 +143,21 @@ func createMsgString(header string, msg string) string {
 	return fmt.Sprintf("%s;%s\n", header, msg)
 }
 
+// InitializeFood is to create 50 foods at the beginning of the game
 func InitializeFood() {
 	Foods.Mux.Lock()
 	for i := 0; i < 50; i++ {
-		food := generateFood()
+		food := generateFood("NORMAL")
+		Foods.Foods[food.ID] = food
+	}
+	for i := 0; i < 5; i++ {
+		food := generateFood("INVISIBLE")
 		Foods.Foods[food.ID] = food
 	}
 	Foods.Mux.Unlock()
 }
 
+// InitializeMaze is to create the new maze at the beginning of the game.
 func InitializeMaze() {
 	Maze = maze.NewMaze()
 	Maze.SetUp()
