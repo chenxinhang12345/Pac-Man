@@ -100,19 +100,21 @@ func (user User) ToString() string {
 // ToBytes is to format user data to bytes
 func (user User) ToBytes() []byte {
 	info := struct {
-		ID    int
-		Color int
-		X     int
-		Y     int
-		Score int
-		Type  string
+		ID      int
+		Color   int
+		X       int
+		Y       int
+		Score   int
+		Type    string
+		Visible bool
 	}{
-		ID:    user.ID,
-		Color: user.Color,
-		X:     user.X,
-		Y:     user.Y,
-		Score: user.Score,
-		Type:  user.Type,
+		ID:      user.ID,
+		Color:   user.Color,
+		X:       user.X,
+		Y:       user.Y,
+		Score:   user.Score,
+		Type:    user.Type,
+		Visible: true,
 	}
 	userMarshal, err := json.Marshal(info)
 	if err != nil {
@@ -165,7 +167,7 @@ func (user *User) HandleInvisibleTimer() {
 	for {
 		<-user.InvisibleTimer.C
 		user.Visible = true
-		user.TCPMQ <- createMsgString("POS", user.PosToString())
+		user.TCPMQ <- createMsgString("VISIBLE", "")
 		logrus.Infof("User %d invisible duration expires", user.ID)
 	}
 }
