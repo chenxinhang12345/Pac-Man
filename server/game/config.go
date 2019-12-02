@@ -16,13 +16,13 @@ const (
 
 // UsersLookUP stores all users infomaion
 type UsersLookUP struct {
-	Users map[int]User
+	Users map[int]*User
 	Mux   sync.RWMutex
 }
 
 // Users stores all users infomaion
 var Users = UsersLookUP{
-	Users: make(map[int]User),
+	Users: make(map[int]*User),
 }
 
 // MoveInfo is the data scheme from the player
@@ -91,12 +91,20 @@ func (food Food) ToString() string {
 }
 
 // ToStringList is to create a food list, which will be used at the start of the game
-func (foodsTable FoodsLookUP) ToStringList() []string {
+func (foodsTable *FoodsLookUP) ToStringList() []string {
+	foodsTable.Mux.RLock()
 	var foodList []string
 	for _, v := range foodsTable.Foods {
 		foodList = append(foodList, v.ToString())
 	}
+	foodsTable.Mux.RUnlock()
 	return foodList
+}
+
+func (foodsTable *FoodsLookUP) AddFood(food Food) {
+	foodsTable.Mux.Lock()
+	Foods.Foods[food.ID] = food
+	foodsTable.Mux.Unlock()
 }
 
 // Maze is the main data structure to the walls

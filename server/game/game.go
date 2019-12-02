@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -56,7 +57,8 @@ func handleEAT(eat EatInfo) {
 	if food, ok := Foods.Foods[eat.FoodID]; ok {
 		// Delete original food
 		delete(Foods.Foods, eat.FoodID)
-		if food.Type == "FOOD" {
+		Foods.Mux.Unlock()
+		if food.Type == "NORMAL" {
 			Users.Mux.Lock()
 			user := Users.Users[eat.ID]
 			user.Score++
@@ -67,17 +69,26 @@ func handleEAT(eat EatInfo) {
 			}
 			Users.Mux.Unlock()
 			distributeScore(scoreList)
-			food := generateFood("FOOD")
-			Foods.Foods[food.ID] = food
+			food := generateFood("NORMAL")
+			Foods.AddFood(food)
 			foodList := Foods.ToStringList()
 			DistributeFood(foodList)
 			distributeAddFood(food)
 		} else if food.Type == "INVISIBLE" {
-
+			Users.Mux.Lock()
+			user := Users.Users[eat.ID]
+			user.Visible = false
+			user.InvisibleTimer = time.NewTimer(time.Second * 5)
+			Users.Mux.Unlock()
+			food := generateFood("INVISIBLE")
+			Foods.AddFood(food)
+			foodList := Foods.ToStringList()
+			DistributeFood(foodList)
+			distributeAddFood(food)
 		}
-
+	} else {
+		Foods.Mux.Unlock()
 	}
-	Foods.Mux.Unlock()
 }
 
 func generateFood(Type string) Food {
@@ -136,7 +147,11 @@ func createMsgString(header string, msg string) string {
 func InitializeFood() {
 	Foods.Mux.Lock()
 	for i := 0; i < 50; i++ {
-		food := generateFood("FOOD")
+		food := generateFood("NORMAL")
+		Foods.Foods[food.ID] = food
+	}
+	for i := 0; i < 5; i++ {
+		food := generateFood("INVISIBLE")
 		Foods.Foods[food.ID] = food
 	}
 	Foods.Mux.Unlock()
@@ -145,7 +160,5 @@ func InitializeFood() {
 // InitializeMaze is to create the new maze at the beginning of the game.
 func InitializeMaze() {
 	Maze = maze.NewMaze()
-	fmt.Println("New maze")
 	Maze.SetUp()
-	fmt.Println("Maze setup")
 }
