@@ -40,14 +40,15 @@ func NewUser(conn net.Conn) *User {
 	widthPart := MazeWidth / maze.Width
 	heightPart := MazeHeight / maze.Height
 	user := &User{
-		ID:      id,
-		X:       xCell*widthPart + widthPart/3,
-		Y:       yCell*heightPart + heightPart/3,
-		Type:    "PACMAN",
-		Visible: true,
-		Conn:    conn,
-		Color:   -rand.Intn(16777215),
-		TCPMQ:   make(chan string, 1024),
+		ID:             id,
+		X:              xCell*widthPart + widthPart/3,
+		Y:              yCell*heightPart + heightPart/3,
+		Type:           "PACMAN",
+		Visible:        true,
+		Conn:           conn,
+		Color:          -rand.Intn(16777215),
+		TCPMQ:          make(chan string, 1024),
+		InvisibleTimer: new(time.Timer),
 	}
 	// if len(Users.Users) != 0 && len(Users.Users)%2 == 0 {
 	// 	user.Type = "GHOST"
@@ -161,6 +162,9 @@ func (user User) PosToString() string {
 // HandleInvisibleTimer will check the timer.
 // When the invisible duration expires, the user will become visible
 func (user *User) HandleInvisibleTimer() {
-	<-user.InvisibleTimer.C
-	user.Visible = true
+	for {
+		<-user.InvisibleTimer.C
+		user.Visible = true
+	}
+
 }
