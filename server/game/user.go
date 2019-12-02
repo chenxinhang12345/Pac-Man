@@ -48,7 +48,7 @@ func NewUser(conn net.Conn) *User {
 		Conn:           conn,
 		Color:          -rand.Intn(16777215),
 		TCPMQ:          make(chan string, 1024),
-		InvisibleTimer: new(time.Timer),
+		InvisibleTimer: time.NewTimer(0),
 	}
 	// if len(Users.Users) != 0 && len(Users.Users)%2 == 0 {
 	// 	user.Type = "GHOST"
@@ -165,6 +165,6 @@ func (user *User) HandleInvisibleTimer() {
 	for {
 		<-user.InvisibleTimer.C
 		user.Visible = true
+		logrus.Infof("User %d invisible duration expires", user.ID)
 	}
-
 }

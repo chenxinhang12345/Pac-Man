@@ -29,6 +29,7 @@ func decodeTCPMsg(str string) {
 }
 
 func handleAttack(attack AttackInfo) {
+	logrus.Infof("Player %d was attacked", attack.PacmanID)
 	Users.Mux.Lock()
 	ghost := Users.Users[attack.GhostID]
 	pacman := Users.Users[attack.PacmanID]
@@ -59,6 +60,7 @@ func handleEAT(eat EatInfo) {
 		delete(Foods.Foods, eat.FoodID)
 		Foods.Mux.Unlock()
 		if food.Type == "NORMAL" {
+			logrus.Infof("Player %d eat normal food", eat.ID)
 			Users.Mux.Lock()
 			user := Users.Users[eat.ID]
 			user.Score++
@@ -75,10 +77,12 @@ func handleEAT(eat EatInfo) {
 			DistributeFood(foodList)
 			distributeAddFood(food)
 		} else if food.Type == "INVISIBLE" {
+			logrus.Infof("Player %d eat invisible food", eat.ID)
 			Users.Mux.Lock()
 			user := Users.Users[eat.ID]
 			user.Visible = false
-			user.InvisibleTimer = time.NewTimer(time.Second * 5)
+			user.InvisibleTimer.Stop()
+			user.InvisibleTimer.Reset(3 * time.Second)
 			Users.Mux.Unlock()
 			food := generateFood("INVISIBLE")
 			Foods.AddFood(food)
@@ -155,6 +159,7 @@ func InitializeFood() {
 		Foods.Foods[food.ID] = food
 	}
 	Foods.Mux.Unlock()
+	logrus.Infoln("Successfully initialized food.")
 }
 
 // InitializeMaze is to create the new maze at the beginning of the game.
