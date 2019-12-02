@@ -7,6 +7,6 @@ import (
 func main() {
 	go network.TCPListen()
 	defer network.TCPServer.Close()
-	defer network.UDPServer.Close()
+	// defer network.UDPServer.Close()
 	select {}
 }
