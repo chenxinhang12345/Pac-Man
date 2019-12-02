@@ -109,6 +109,7 @@ public class Client {
 
     public void sendAttackData(int ghostID, int pacmanID) throws  IOException {
         String buffer = "ATTACK;{\"GhostID:\":"+ghostID+",\"PacmanID\":"+pacmanID+" }\n";
+        System.out.println("send respawn data");
         outToServer.writeBytes(buffer);
     }
 

@@ -83,6 +83,10 @@ public class Player implements GameObject {
         return rectangle;
     }
 
+    public Rect getLogicRectangle(){
+        return new Rect(rectangle.left,rectangle.top,rectangle.right,rectangle.bottom);
+    }
+
     @Override
     public void draw(Canvas canvas) {
 //        Paint paint = new Paint();
@@ -90,7 +94,9 @@ public class Player implements GameObject {
         if(this.type.equals("PACMAN")){
             canvas.drawRect(rectangle,paint);
         }else{
-            canvas.drawCircle(xPos,yPos,10,paint);
+            int x = (rectangle.left+rectangle.right)/2;
+            int y = (rectangle.top+rectangle.bottom)/2;
+            canvas.drawCircle(x,y,rectangle.width()-5,paint);
         }
 
 
@@ -106,8 +112,6 @@ public class Player implements GameObject {
     }
 
     public void changePosition(int x, int y){
-        xPos = x;
-        yPos = y;
         rectangle.set(x-rectangle.width()/2,y-rectangle.height()/2,x+rectangle.width()/2,y+rectangle.height()/2);
     }
 

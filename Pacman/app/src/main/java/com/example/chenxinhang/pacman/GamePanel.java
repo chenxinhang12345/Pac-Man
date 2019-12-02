@@ -96,7 +96,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             public void run() {
                 while (true) {
                     try {
-                        sleep(50);
+                        sleep(20);
                         playerClient.send(player1.getxPos(), player1.getyPos(), player1.getID());
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -355,7 +355,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public boolean isEatPlayer(Player player1, Player player2){
-        if (player1.getRectangle().intersect(player2.getRectangle())){
+        if (player1.getLogicRectangle().intersect(player2.getLogicRectangle())){
+            System.out.println("send respawn data");
             try {
                 playerClient.sendAttackData(player1.getID(),player2.getID());
             }catch (Exception e){
@@ -373,14 +374,14 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void obstacle() {
         food.entrySet().removeIf(e -> (isEat(player1, e, true)));
         food.entrySet().removeIf(e -> (isEat(player2, e, false)));
-        if(player1.getType().equals("GHOST")) {
-            isEatPlayer(player1, player2);
-            if(players.size()>0) {
-                for (Player mulPlayer : players.values()) {
-                    isEatPlayer(player1, mulPlayer);
-                }
-            }
-        }
+//        if(player1.getType().equals("GHOST")) {
+//            isEatPlayer(player1, player2);
+//            if(players.size()>0) {
+//                for (Player mulPlayer : players.values()) {
+//                    isEatPlayer(player1, mulPlayer);
+//                }
+//            }
+//        }
         if (players.size() > 0) {
             for (Player mulPlayer : players.values()) {
                 food.entrySet().removeIf(e -> (isEat(mulPlayer, e, false)));
@@ -431,8 +432,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             food.draw(canvas);
         }
         drawWalls(canvas);
-
-
     }
 
 }
