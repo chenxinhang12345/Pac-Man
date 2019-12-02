@@ -31,6 +31,9 @@ func decodeTCPMsg(str string) {
 func handleAttack(attack AttackInfo) {
 	logrus.Infof("Player %d was attacked", attack.PacmanID)
 	Users.Mux.Lock()
+	fmt.Printf("%+v\n", attack)
+	fmt.Printf("%+v\n", Users.Users)
+
 	ghost := Users.Users[attack.GhostID]
 	pacman := Users.Users[attack.PacmanID]
 	ghost.Score += pacman.Score
