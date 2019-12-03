@@ -38,8 +38,8 @@ public class Wall implements GameObject {
         canvas.drawRect(rectangle, paint);
     }
 
-    public Rect getLogicRectangle(){
-        return new Rect(left,top,right,bottom);
+    public Rect getLogicRectangle() {
+        return new Rect(left, top, right, bottom);
     }
 
     public static Wall getRowWall(int x1, int x2, int y){

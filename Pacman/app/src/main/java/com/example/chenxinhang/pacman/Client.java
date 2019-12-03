@@ -32,7 +32,7 @@ public class Client {
         this.ip = InetAddress.getByName(SERVER_IP);
         this.buf = null;
         this.receiveBuf = new byte[256];
-        this.twoPlayerJoined= false;
+        this.twoPlayerJoined = false;
         this.gamePanel = gamePanel;
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -47,36 +47,36 @@ public class Client {
                         if ((Bytes = inFromServer.readLine()) != null) {
                             System.out.println(Bytes);
                             String[] stringlist = Bytes.split(";", 2);
-                            if (stringlist[0].equals("USERINFO")){
+                            if (stringlist[0].equals("USERINFO")) {
                                 receivedBytes = stringlist[1];
-                            } else if (stringlist[0].equals("NEWUSER")){
+                            } else if (stringlist[0].equals("NEWUSER")) {
                                 newUser = stringlist[1];
-                                if(twoPlayerJoined){
+                                if (twoPlayerJoined) {
                                     gamePanel.parseInfoAddNewUser(newUser);
-                                }else{
+                                } else {
                                     gamePanel.parseInfoAddPlayer2(newUser);
                                 }
                                 twoPlayerJoined = true;
-                            }else if (stringlist[0].equals("FOOD")){
+                            } else if (stringlist[0].equals("FOOD")) {
                                 food = stringlist[1];
 //                                String wall = "{\"Rows\":[{\"X1\":0 ,\"X2\":200,\"Y\":800},{\"X1\":200 ,\"X2\":400,\"Y\":800},{\"X1\":0 ,\"X2\":200,\"Y\":1000}]," +
 //                                        "\"Cols\": [{\"Y1\":800 ,\"Y2\":1000,\"X\":0},{\"Y1\":800 ,\"Y2\":1000,\"X\":200}]}";
 
-                            }else if(stringlist[0].equals("SCORE")) {
+                            } else if (stringlist[0].equals("SCORE")) {
                                 gamePanel.parseInfoUpdateScore(stringlist[1]);
                                 System.out.println(stringlist[1]);
-                            }else if(stringlist[0].equals("MAZE")){
+                            } else if (stringlist[0].equals("MAZE")) {
                                 System.out.println(stringlist[1]);
                                 gamePanel.initializeWalls(stringlist[1]);
 
-                            }else if(stringlist[0].equals("ADDFOOD")){
+                            } else if (stringlist[0].equals("ADDFOOD")) {
                                 gamePanel.parseInfoAddNewFood(stringlist[1]);
-                            }else if (stringlist[0].equals("POS")){
+                            } else if (stringlist[0].equals("POS")) {
                                 System.out.println("respawn");
                                 gamePanel.parseInfoRespawn(stringlist[1]);
-                            }else if(stringlist[0].equals("VISIBLE")){
+                            } else if (stringlist[0].equals("VISIBLE")) {
                                 gamePanel.visiblePlayer();
-                            }else if(stringlist[0].equals("END")){
+                            } else if (stringlist[0].equals("END")) {
                                 gamePanel.endGameParseScore(stringlist[1]);
                             }
                         }
@@ -93,8 +93,8 @@ public class Client {
 
     }
 
-    public void send(int xPos, int yPos, int ID,boolean visible) throws IOException {
-        buf = ("POS;{\"ID\":" + ID + ", \"X\":" + xPos + ", \"Y\": " + yPos + ",\"Visible\":"+ visible+"}\n").getBytes();
+    public void send(int xPos, int yPos, int ID, boolean visible) throws IOException {
+        buf = ("POS;{\"ID\":" + ID + ", \"X\":" + xPos + ", \"Y\": " + yPos + ",\"Visible\":" + visible + "}\n").getBytes();
         DatagramPacket DPsend = new DatagramPacket(buf, buf.length, ip, UDP_SERVER_PORT);
         ds.send(DPsend);
     }
@@ -106,13 +106,13 @@ public class Client {
         return data;
     }
 
-    public void sendEatData(int ID , int FoodID) throws IOException{
-       String buffer =  "EAT;{\"ID\":" + ID + ", \"FoodID\":" +FoodID + " }\n";
-       outToServer.writeBytes(buffer);
+    public void sendEatData(int ID, int FoodID) throws IOException {
+        String buffer = "EAT;{\"ID\":" + ID + ", \"FoodID\":" + FoodID + " }\n";
+        outToServer.writeBytes(buffer);
     }
 
-    public void sendAttackData(int ghostID, int pacmanID) throws  IOException {
-        String buffer = "ATTACK;{\"GhostID\":"+ghostID+",\"PacmanID\":"+pacmanID+" }\n";
+    public void sendAttackData(int ghostID, int pacmanID) throws IOException {
+        String buffer = "ATTACK;{\"GhostID\":" + ghostID + ",\"PacmanID\":" + pacmanID + " }\n";
         outToServer.writeBytes(buffer);
     }
 

@@ -14,33 +14,36 @@ public class Food implements GameObject {
     private int color;
     private String type;
 
-    public Food(int xPos, int yPos, String type ){
+    public Food(int xPos, int yPos, String type) {
         this.xPos = xPos;
         this.yPos = yPos;
         this.height = 10;
         this.width = 10;
         this.type = type;
-        if(type.equals("NORMAL")) {
+        if (type.equals("NORMAL")) {
             this.color = Color.rgb(252, 148, 3);
-        }else if(type.equals("INVISIBLE")){
+        } else if (type.equals("INVISIBLE")) {
             this.color = Color.BLUE;
         }
-        this.rectangle = new Rect(xPos-width/2,yPos-height/2,xPos+width/2,yPos+height/2);
+        this.rectangle = new Rect(xPos - width / 2, yPos - height / 2, xPos + width / 2, yPos + height / 2);
     }
-    public Rect getRectangle(){
+
+    public Rect getRectangle() {
         return this.rectangle;
     }
 
-    public Rect getLogicRectangle(){
-        return new Rect(rectangle.left,rectangle.top,rectangle.right,rectangle.bottom);
+    public Rect getLogicRectangle() {
+        return new Rect(rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
     }
-    public String getType(){
+
+    public String getType() {
         return type;
     }
+
     @Override
-    public void draw(Canvas canvas){
+    public void draw(Canvas canvas) {
         Paint paint = new Paint();
         paint.setColor(color);
-        canvas.drawRect(rectangle,paint);
+        canvas.drawRect(rectangle, paint);
     }
 }
